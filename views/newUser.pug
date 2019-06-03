@@ -1,0 +1,23 @@
+extends layout.pug
+
+block content
+	p Please complete the following form.
+	form(method = "post" action = "/admin/newUser")
+		div.form-group
+			label(for='username') Username:
+			input(type = 'text', name = "username")
+		div.form-group
+			label(for='firstname') First name:
+			input(type = 'text', name = "firstname")
+		div.form-group
+			label(for='lastname') Last name:
+			input(type = 'text', name = "lastname")
+		div.form-group
+			label(for='role') User Role:
+			- const roles = [{name: 'Administrator', value: 'admin'}, {name: 'Instructor', value: 'instructor'}, {name:'Student', value: 'student'}]
+			select(name = 'role')
+				each role in roles
+					option(value = (role.value)) #{role.name}
+		p An initial password will be assigned automatically.
+		button(type = "submit") Complete Registration
+		
