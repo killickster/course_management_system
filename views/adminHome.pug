@@ -1,0 +1,7 @@
+extends layout.pug
+
+block content
+	p Welcome #{name}!
+	p Please select one of the options below.
+	form(method = "get" action = "/admin/newUser")
+		button(type = "submit") Create New User Account
