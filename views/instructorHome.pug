@@ -1,0 +1,8 @@
+extends layout.pug
+
+block content
+	p Welcome #{name}!
+	p Please select one of the options below.
+	form(method = "post" action = "/instructor")
+		div.form-group
+			button(name = "button_id" value = "logout" type = "submit") Logout
