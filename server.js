@@ -46,6 +46,9 @@ app.get('/', sessionChecker, (req, res) => {
 
 app.route('/login')
 	.get(sessionChecker, (req, res) => {
+		message = req.session.loginMessage;
+		req.session.loginMessage = undefined;
+		delete(req.session.loginMessage);
 		res.sendFile(path.join(__dirname + '/public/login.html'));
 	})
 	.post((req, res) => {
@@ -56,6 +59,8 @@ app.route('/login')
 			connection.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function(error, results, fields){
 				if (results.length  > 0 ) {
 					req.session.user = results[0];
+					req.session.user.password = undefined;
+					delete(req.session.user.password);
 					res.redirect('/roles');
 				} else {
 					res.send('Incorrect Username and/or Password!');

@@ -4,5 +4,13 @@ block content
 	p Welcome #{name}!
 	p Please select one of the options below.
 	form(method = "post" action = "/admin")
-		button(name = "button_id" value = "newUser" type = "submit") Create New User Account
-		button(name = "button_id" value = "logout" type = "submit") Logout
+		div.form-group
+			button(name = "button_id" value = "newUser" type = "submit") Create New User Account
+		div.form-group
+			button(name = "button_id" value = "newDept" type = "submit") Create New Department
+		div.form-group
+			button(name = "button_id" value = "newCourse" type = "submit") Add Course to Catalogue
+		div.form-group
+			button(name = "button_id" value = "changePass" type = "submit") Change Account Password
+		div.form-group
+			button(name = "button_id" value = "logout" type = "submit") Logout

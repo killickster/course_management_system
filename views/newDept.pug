@@ -1,0 +1,23 @@
+extends layout.pug
+
+block content
+	if message == 'missingField'
+		p One or more fields missing.
+	if message == 'deptExists'
+		p Department with same identifiers already exists.
+	if message == 'success'
+		p #{newDept.name} added!
+	
+	p Please complete the following form.
+	form(method = "post" action = "/admin/newDept")
+		div.form-group
+			label(for='name') Name of Department:
+			input(type = 'text', name = "name")
+		div.form-group
+			label(for='abbv') Abbreviation:
+			input(type = 'text', name = "abbv")
+		div.form-group
+		button(type = "submit" name = "button_id" value = "submit") Add Department
+		div.form-group
+		button(type = "submit" name = "button_id" value = "cancel") Return to Homepage
+		
