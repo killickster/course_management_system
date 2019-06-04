@@ -1,6 +1,15 @@
 extends layout.pug
 
 block content
+	if message == 'missingField'
+		p One or more fields missing.
+	if message == 'userExists'
+		p User #{newUser.username} already exists.
+	if message == 'success'
+		p New user added!
+		p Username: #{newUser.username}
+		p Password: #{newUser.password}
+	
 	p Please complete the following form.
 	form(method = "post" action = "/admin/newUser")
 		div.form-group
@@ -19,5 +28,8 @@ block content
 				each role in roles
 					option(value = (role.value)) #{role.name}
 		p An initial password will be assigned automatically.
-		button(type = "submit") Complete Registration
+		div.form-group
+		button(type = "submit" name = "button_id" value = "submit") Complete Registration
+		div.form-group
+		button(type = "submit" name = "button_id" value = "cancel") Return to Homepage
 		

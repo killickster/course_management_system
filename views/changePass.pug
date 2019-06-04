@@ -1,0 +1,28 @@
+extends layout.pug
+
+block content
+	if message == 'wrongOldPass'
+		p Old password was incorrect.
+	if message == 'samePass'
+		p New password cannot be the same as the old one.
+	if message == 'missingField'
+		p One or more fields is missing.
+	if message == 'success'
+		p Password changed!
+	
+	p Please complete the following form.
+	form(method = "post" action = "/admin/changePass")
+		div.form-group
+			label(for='username') Old Password:
+			input(type = 'password', name = "oldpass")
+		div.form-group
+			label(for='newpass') New Password:
+			input(type = 'password', name = "newpass")
+		div.form-group
+			label(for='newpassconf') Confirm New Password:
+			input(type = 'password', name = "newpassconf")
+		div.form-group
+		button(type = "submit" name = "button_id" value = "submit") Change Password
+		div.form-group
+		button(type = "submit" name = "button_id" value = "cancel") Return to Homepage
+		
