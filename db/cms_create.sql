@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `courses` (
 	`course_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`dept_id` int(11) UNSIGNED NOT NULL REFERENCES `departments`(`dept_id`),
 	`course_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+	`course_num` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
 	`course_desc` text COLLATE utf8_unicode_ci NOT NULL,
 	`course_len` ENUM('full', 'half', 'short') NOT NULL,
 	PRIMARY KEY (`course_id`)

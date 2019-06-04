@@ -1,0 +1,25 @@
+extends layout.pug
+
+block content
+	if message == 'missingField'
+		p One or more fields missing.
+	if message == 'progExists'
+		p Program with same identifier already exists.
+	if message == 'success'
+		p #{newProgram.name} added!
+	
+	p Please complete the following form.
+	form(method = "post" action = "/admin/newProgram")
+		div.form-group
+			label(for='name') Name of Program:
+			input(type = 'text', name = "name")
+		div.form-group
+			label(for='abbv') Abbreviation:
+			input(type = 'text', name = "abbv")
+		div.form-group
+			label(for='desc') Program Description (optional):
+			input(type = 'textarea', name = "desc" rows = "6" cols = "66")
+		div.form-group
+		button(type = "submit" name = "button_id" value = "submit") Add Program
+		div.form-group
+		button(type = "submit" name = "button_id" value = "cancel") Return to Homepage

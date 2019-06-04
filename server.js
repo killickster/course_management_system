@@ -6,17 +6,18 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
 var adminRouter = require('./routes/admin');
-//var instructorRouter = require('./routes/instructor');
-//var studentRouter = require('./routes/student');
+var instructorRouter = require('./routes/instructor');
+var studentRouter = require('./routes/student');
 var connection = mysql.createConnection({
 	host		: 'localhost',
 	user		: 'root',
-	password	: 'password',
+	password	: 'paSSword123+',
 	database	: 'cms'
 });
 
 var app = express();
 app.set('view engine', 'pug');
+
 
 app.use(session({
 	key: 'user_sid',
@@ -25,12 +26,13 @@ app.use(session({
 	saveUninitialized: false,
 }));
 
+
 app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 
 app.use('/admin', adminRouter);
-//app.use('/instructor', instructorRouter);
-//app.use('/student', studentRouter);
+app.use('/instructor', instructorRouter);
+app.use('/student', studentRouter);
 
 var sessionChecker = (req, res, next) => {
 	if (req.session.user) {
