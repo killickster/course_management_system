@@ -14,13 +14,21 @@ var connection = mysql.createConnection({
 	database	: 'cms'
 });
 
+var sessionChecker = (req, res, next) => {
+	if (!req.session.user) {
+		res.redirect('/login');
+	} else {
+		next();
+	}
+};
+
 router.route('/')
-	.get((req, res) => {
-		res.render('adminHome', { name: req.session.name});
+	.get(sessionChecker, (req, res) => {
+		res.render('adminHome', { name: req.session.user.first_name});
 	})
 	.post((req, res) => {
-		
-	});
+		res.redirect('/admin/'+req.body.button_id);
+	})
 	
 router.route('/newUser')
 	.get((req, res) => {
@@ -40,5 +48,20 @@ router.route('/newUser')
 		connection.query('INSERT INTO `users` (`username`, `password`, `first_name`, `last_name`, `role`) VALUES ( \''+username+'\',\''+password+'\',\''+firstname+'\',\''+lastname+'\',\''+role+'\')');
 	});
 
+	/*
+router.route('/newDept')
+	.get() => {
+		res.render('newDept');
+	}
+	.post(() => {
+	});
+	*/
+	
+router.route('/logout')
+	.get((req, res) => {
+		req.session.user = undefined;
+		delete(req.session.user);
+		res.redirect('/login');
+	})
 
 module.exports = router;
