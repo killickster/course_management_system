@@ -3,5 +3,6 @@ extends layout.pug
 block content
 	p Welcome #{name}!
 	p Please select one of the options below.
-	form(method = "get" action = "/admin/newUser")
-		button(type = "submit") Create New User Account
+	form(method = "post" action = "/admin")
+		button(name = "button_id" value = "newUser" type = "submit") Create New User Account
+		button(name = "button_id" value = "logout" type = "submit") Logout

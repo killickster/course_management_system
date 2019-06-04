@@ -33,7 +33,7 @@ app.use('/admin', adminRouter);
 //app.use('/student', studentRouter);
 
 var sessionChecker = (req, res, next) => {
-	if (req.session.user_id) {
+	if (req.session.user) {
 		res.redirect('/roles');
 	} else {
 		next();
@@ -55,10 +55,7 @@ app.route('/login')
 		if (username && password) {
 			connection.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function(error, results, fields){
 				if (results.length  > 0 ) {
-					req.session.loggedin = true;
-					req.session.user_id = results[0].user_id;
-					req.session.name = results[0].first_name;
-					req.session.role = results[0].role;
+					req.session.user = results[0];
 					res.redirect('/roles');
 				} else {
 					res.send('Incorrect Username and/or Password!');
@@ -72,7 +69,7 @@ app.route('/login')
 	});
 	
 app.get('/roles', (req, res) => {
-		res.redirect('/' + req.session.role);
+		res.redirect('/' + req.session.user.role);
 	});
 	
 app.listen(3000);
