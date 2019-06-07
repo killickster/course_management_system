@@ -14,9 +14,6 @@ var connection = mysql.createConnection({
 	database	: 'cms'
 });
 
-async function pause(ms){
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'admin') {
@@ -80,6 +77,37 @@ router.route('/newUser')
 		}
 	});
 
+
+router.route('/newClass').get(sessionChecker, (req,res) => {
+
+	connection.query('SELECT * FROM courses', (error, results, fields) => {
+		var courseSelected = "false";
+		var courses = JSON.parse(JSON.stringify(results));
+		res.render('newClass', {courses:courses, courseSelected:courseSelected});
+	})
+}).post((req, res) => {
+	var buttonPressed = req.body.button_id;
+	var course_id = req.body.course_id;
+	if(buttonPressed== 'select' && course_id[0] != "void"){
+		connection.query('Select * FROM courses', (error, results, fields) => {
+			var courseSelected="true";
+			var courses = JSON.parse(JSON.stringify(results));
+			res.render('newClass',{courses:courses,courseSelected:courseSelected} )
+		})
+
+	}
+	if(buttonPressed=='submit'){
+		var schoolYear = req.body.year;
+		var section = req.body.section;
+		var sectionType = req.body.section_type;
+		var sessionStart = req.body.section_start
+		if(schoolYear && section && sectionType && sessionStart){
+			connection.query('INSERT INTO classes VALUES (?,?,?,?)', [course_id, schoolYear,section, sectionType, sessionStart])
+
+		}
+	}
+})
+
 router.route('/newDept')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.deptMessage;
@@ -140,6 +168,7 @@ router.route('/newCourse')
 		if (course_desc == undefined) course_desc = "";
 		var course_len = req.body.len;
 		if(buttonPressed == "submit") {
+			console.log(req.body.len);
 			if (course_name && course_num) {
 				connection.query('SELECT * FROM courses WHERE dept_id = ? AND course_num = ?', [dept_id, course_num] , function (error, results, fields) {
 					if(results.length == 0) {
@@ -188,12 +217,12 @@ router.route('/newProgram')
 						res.redirect('newProgram');
 					} else {
 						req.session.progMessage = 'progExists';
-						res.redirect('newProg');
+						res.redirect('newProgram');
 					}
 				});
 			} else {
 				req.session.progMessage = 'missingField';
-				res.redirect('newProg');
+				res.redirect('newProgram');
 			}
 		} else {
 			res.redirect('/');

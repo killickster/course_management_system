@@ -1,0 +1,29 @@
+extends layout.pug
+
+
+block content
+
+    
+    -var courseSelected = false;
+    p Select a course from the following drop down menu
+    form(method = "post" action = "/student/courseRegistration")
+        div.form-group
+            select(name='course_id')
+                option(value="void") #{"select an option"}
+                each course in courses
+                    option(value = (course.course_id)) #{course.course_name}
+        div.form-group
+        button(name = "button_id" value = "select" type = "submit") select 
+        div.form-group
+            select(name='class_id')
+                option(value="void") #{"select an option"}
+                each clas in classes
+                    option(value = (clas.class_id)) #{clas.class_id}
+        div.form-group
+        button(name = "button_id" value = "submit" type = "submit") submit
+        div.form-group
+        if courseSelected
+            div.form-group
+                select(name='class_id')
+                    each clas in classes
+                        option(value = (clas.class_id)) #{clas.class_name}

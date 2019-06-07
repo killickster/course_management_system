@@ -6,9 +6,6 @@ var bodyParser = require('body-parser');
 var path = require('path');
 
 
-async function pause(ms){
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 
 var sessionChecker = (req, res, next) => {

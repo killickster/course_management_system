@@ -6,3 +6,11 @@ block content
 	form(method = "post" action = "/student")
 		div.form-group
 			button(name = "button_id" value = "logout" type = "submit") Logout
+		div.form-group
+			button(name = "button_id" value = "courseRegistration" type = "submit") Register
+		div.form-group
+			ul
+				each course in courses
+					li=course
+
+
