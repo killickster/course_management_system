@@ -4,14 +4,9 @@ var router = express.Router();
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
+var fs = require('fs');
 
-var connection = mysql.createConnection({
-	host		: 'localhost',
-	user		: 'root',
-	password	: 'paSSword123+',
-	database	: 'cms'
-});
-
+var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
 
 function change(){
     console.loc("HI");
