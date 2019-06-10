@@ -6,17 +6,10 @@ var router = express.Router();
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
+var fs = require('fs');
 
-var connection = mysql.createConnection({
-	host		: 'localhost',
-	user		: 'root',
-	password	: 'paSSword123+',
-	database	: 'cms'
-});
+var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
 
-async function pause(ms){
-	return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'admin') {
@@ -30,7 +23,10 @@ var sessionChecker = (req, res, next) => {
 
 router.route('/')
 	.get(sessionChecker, (req, res) => {
-		res.render('adminHome', { name: req.session.user.first_name});
+		message = req.session.loginMessage;
+		req.session.loginMessage = undefined;
+		delete(req.session.loginMessage);
+		res.render('adminHome', { name: req.session.user.first_name, message : message});
 	})
 	.post((req, res) => {
 		res.redirect('/admin/'+req.body.button_id);
@@ -79,6 +75,40 @@ router.route('/newUser')
 			res.redirect('/');
 		}
 	});
+
+
+router.route('/newClass').get(sessionChecker, (req,res) => {
+
+	connection.query('SELECT * FROM courses', (error, results, fields) => {
+		var courseSelected = 0;
+		var courses = JSON.parse(JSON.stringify(results));
+		res.render('newClass', {courses:courses, courseSelected:courseSelected});
+	})
+}).post((req, res) => {
+	var buttonPressed = req.body.button_id;
+	var course_id = req.body.course_id;
+	if(buttonPressed== 'select' && course_id[0] != "void"){
+		connection.query('Select * FROM courses', (error, results, fields) => {
+			var courseSelected=course_id;
+			var courses = JSON.parse(JSON.stringify(results));
+			res.render('newClass',{courses:courses,courseSelected:courseSelected} )
+		})
+
+	}
+	else if(buttonPressed=='submit'){
+		var schoolYear = req.body.year;
+		var section = req.body.section;
+		var sectionType = req.body.section_type;
+		var sessionStart = req.body.section_start;
+		if(schoolYear && section && sectionType && sessionStart){
+			connection.query('INSERT INTO classes (`course_id`, `schoolyear`, `sect`, `sect_type`, `sess_start`) VALUES (?,?,?,?,?)', [course_id, schoolYear,section, sectionType, sessionStart]);
+			req.session.newClassMessage = 'success';
+			res.redirect('newClass');
+		}
+	} else {
+			res.redirect('/');
+	}
+})
 
 router.route('/newDept')
 	.get(sessionChecker, (req, res) => {
@@ -140,6 +170,7 @@ router.route('/newCourse')
 		if (course_desc == undefined) course_desc = "";
 		var course_len = req.body.len;
 		if(buttonPressed == "submit") {
+			console.log(req.body.len);
 			if (course_name && course_num) {
 				connection.query('SELECT * FROM courses WHERE dept_id = ? AND course_num = ?', [dept_id, course_num] , function (error, results, fields) {
 					if(results.length == 0) {
@@ -188,12 +219,12 @@ router.route('/newProgram')
 						res.redirect('newProgram');
 					} else {
 						req.session.progMessage = 'progExists';
-						res.redirect('newProg');
+						res.redirect('newProgram');
 					}
 				});
 			} else {
 				req.session.progMessage = 'missingField';
-				res.redirect('newProg');
+				res.redirect('newProgram');
 			}
 		} else {
 			res.redirect('/');

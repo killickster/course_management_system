@@ -28,8 +28,8 @@ block content
 			label(for='len') Course Length:
 			- const lengths = [{name: 'Full Term', value: 'full'}, {name: 'Half Term', value: 'half'}, {name:'Short', value: 'short'}]
 			select(name = 'len')
-				each len in lengths
-					option(value = (len.value)) #{len.name}
+				each length in lengths
+					option(value = (length.value)) #{length.name}
 		div.form-group
 		button(type = "submit" name = "button_id" value = "submit") Add New Course
 		div.form-group
