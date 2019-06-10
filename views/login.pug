@@ -1,0 +1,23 @@
+extends layout.pug
+
+block content
+	if message == 'loggedOut'
+		p You have logged out.
+	if message == 'invalidLogin'
+		p Incorrect username and/or password.
+	if message == 'incompleteLogin'
+		p Username or password missing.
+	if message == 'noAccess'
+		p You do not have access to that page.
+	
+	p Please enter your username and password.
+	form(method = "post" action = "login")
+		div.form-group
+			label(for='name') Username:
+			input(type = 'text', name = "username")
+		div.form-group
+			label(for='name') Password:
+			input(type = 'password', name = "password")
+		div.form-group
+			button(type = "submit" name = "button_id" value = "submit") Login
+		

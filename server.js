@@ -8,12 +8,9 @@ var path = require('path');
 var adminRouter = require('./routes/admin');
 var instructorRouter = require('./routes/instructor');
 var studentRouter = require('./routes/student');
-var connection = mysql.createConnection({
-	host		: 'localhost',
-	user		: 'root',
-	password	: 'paSSword123+',
-	database	: 'cms'
-});
+var fs = require('fs');
+
+var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
 
 var app = express();
 app.set('view engine', 'pug');
@@ -51,7 +48,7 @@ app.route('/login')
 		message = req.session.loginMessage;
 		req.session.loginMessage = undefined;
 		delete(req.session.loginMessage);
-		res.sendFile(path.join(__dirname + '/public/login.html'));
+		res.render('login', {message : message});
 	})
 	.post((req, res) => {
 		var username = req.body.username;
@@ -65,13 +62,14 @@ app.route('/login')
 					delete(req.session.user.password);
 					res.redirect('/roles');
 				} else {
-					res.send('Incorrect Username and/or Password!');
+					req.session.loginMessage = 'invalidLogin';
+					res.redirect('/login');
 				}
 				res.end();
 				});
 			} else {
-				res.send('Please enter Username and Password!');
-				res.end();
+				req.session.loginMessage = 'incompleteLogin';
+				res.redirect('/login');
 			}
 	});
 	

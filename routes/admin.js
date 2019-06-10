@@ -6,13 +6,9 @@ var router = express.Router();
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
+var fs = require('fs');
 
-var connection = mysql.createConnection({
-	host		: 'localhost',
-	user		: 'root',
-	password	: 'paSSword123+',
-	database	: 'cms'
-});
+var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
 
 
 var sessionChecker = (req, res, next) => {
@@ -27,7 +23,10 @@ var sessionChecker = (req, res, next) => {
 
 router.route('/')
 	.get(sessionChecker, (req, res) => {
-		res.render('adminHome', { name: req.session.user.first_name});
+		message = req.session.loginMessage;
+		req.session.loginMessage = undefined;
+		delete(req.session.loginMessage);
+		res.render('adminHome', { name: req.session.user.first_name, message : message});
 	})
 	.post((req, res) => {
 		res.redirect('/admin/'+req.body.button_id);
@@ -81,7 +80,7 @@ router.route('/newUser')
 router.route('/newClass').get(sessionChecker, (req,res) => {
 
 	connection.query('SELECT * FROM courses', (error, results, fields) => {
-		var courseSelected = "false";
+		var courseSelected = 0;
 		var courses = JSON.parse(JSON.stringify(results));
 		res.render('newClass', {courses:courses, courseSelected:courseSelected});
 	})
@@ -90,21 +89,24 @@ router.route('/newClass').get(sessionChecker, (req,res) => {
 	var course_id = req.body.course_id;
 	if(buttonPressed== 'select' && course_id[0] != "void"){
 		connection.query('Select * FROM courses', (error, results, fields) => {
-			var courseSelected="true";
+			var courseSelected=course_id;
 			var courses = JSON.parse(JSON.stringify(results));
 			res.render('newClass',{courses:courses,courseSelected:courseSelected} )
 		})
 
 	}
-	if(buttonPressed=='submit'){
+	else if(buttonPressed=='submit'){
 		var schoolYear = req.body.year;
 		var section = req.body.section;
 		var sectionType = req.body.section_type;
-		var sessionStart = req.body.section_start
+		var sessionStart = req.body.section_start;
 		if(schoolYear && section && sectionType && sessionStart){
-			connection.query('INSERT INTO classes VALUES (?,?,?,?)', [course_id, schoolYear,section, sectionType, sessionStart])
-
+			connection.query('INSERT INTO classes (`course_id`, `schoolyear`, `sect`, `sect_type`, `sess_start`) VALUES (?,?,?,?,?)', [course_id, schoolYear,section, sectionType, sessionStart]);
+			req.session.newClassMessage = 'success';
+			res.redirect('newClass');
 		}
+	} else {
+			res.redirect('/');
 	}
 })
 
