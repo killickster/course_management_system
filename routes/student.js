@@ -7,7 +7,7 @@ var path = require('path');
 var fs = require('fs');
 
 var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
-var courses = [];
+var courses
 
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'student') {
@@ -21,6 +21,8 @@ var sessionChecker = (req, res, next) => {
 
 router.route('/')
 	.get(sessionChecker, (req, res) => {
+
+        courses = [];
         connection.query('SELECT * FROM has_enrolled WHERE student_id=?;', [req.session.user.user_id], (error, results, fields) => {
             for(i = 0; i < results.length; i++){
             connection.query('SELECT * FROM classes WHERE class_id=?;', [results[i].class_id], (error,results,fields) => {

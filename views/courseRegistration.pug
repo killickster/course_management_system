@@ -9,14 +9,14 @@ block content
     form(method = "post" action = "/student/courseRegistration")
         div.form-group
             select(name='course_id')
-                option(value="void") #{"select an option"}
+                option(value="void") #{"select a course"}
                 each course in courses
                     option(value = (course.course_id)) #{course.course_name}
         div.form-group
         button(name = "button_id" value = "select" type = "submit") select 
         div.form-group
             select(name='class_id')
-                option(value="void") #{"select an option"}
+                option(value="void") #{"select a class"}
                 each clas in classes
                     option(value = (clas.class_id)) #{clas.class_id}
         div.form-group
