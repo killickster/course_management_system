@@ -2,11 +2,11 @@ extends layout.pug
 
 block content
 
-	p Select a course from the following drop down menu
+	p Select a course from the following drop down menu.
 	form(method = "post" action = "/admin/newClass")
 		div.form-group
 			select(name="course_id")
-				option(value="void") #{"select a course"}
+				option(value="void") #{"Select a course"}
 					each course in courses
 						option(value=course.course_id, selected = courseSelected == course.course_id) #{course.dept_abbv} #{course.course_num} - #{course.course_name}
 		div.for-group

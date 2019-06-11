@@ -1,0 +1,30 @@
+extends layout.pug
+
+block content
+	form(method = "post" action = "/admin/editProgram")
+		if programSelected == 0
+			p Select a program from the following drop down menu.
+	
+			div.form-group
+				select(name="program_selected")
+					option(value="void") #{"Select a program"}
+						each program in programs
+							option(value=program, selected = programSelected == program.program_id) #{program.program_abbv} - #{program.program_name}
+			div.for-group
+			button(name = "button_id" value = "select" type = "submit") Select
+		else
+			p Modifying requirements for #{selected_program.program_abbv}:
+			p Current requirements:
+			each course in requirements
+				div.form-group
+					button(name = "button_id" value = "remove" + course.course_id type = "submit") Remove this requirement
+					#{course.dept_abbv} #{course.course_num} - #{course.course_name}
+			p Add a requirement:
+			div.form-group
+				select(name="course_to_add")
+					option(value="void") #{"Select a course"}
+						each course in notRequirements
+							option(value = course, selected = courseSelected == course.course_id) #{course.dept_abbv} #{course.course_num} - #{course.course_name}
+			div.form-group
+				button(name = "button_id" value = "add" type = "submit") Add as requirement
+					
