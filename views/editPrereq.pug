@@ -13,11 +13,12 @@ block content
 			div.for-group
 			button(name = "button_id" value = "select" type = "submit") Select
 		else
+			p Modifying prerequisites for #{selected_course.dept_abbv} #{selected_course.course_num} - #{selected_course.course_name}
 			p Current prerequisites:
 			for prereq in prereqs
 				div.form-group
-					#{prereq.dept_abbv} #{prereq.course_num} - #{prereq.course_name}
 					button(name = "button_id" value = "remove" + prereq.prereq_id type = "submit") Remove this prerequisite
+					#{prereq.dept_abbv} #{prereq.course_num} - #{prereq.course_name}
 			p Add a prerequisite:
 			div.form-group
 				select(name="course_to_add")
