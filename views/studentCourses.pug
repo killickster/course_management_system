@@ -1,0 +1,12 @@
+extends layout.pug
+
+block content
+	p Welcome #{name}!
+	p Your courses are shown below:
+	form(method = "post" action = "/student")
+		div.form-group
+		ul
+			each course in courses
+				li=course.course_name
+		div.form-group
+			button(name = "button_id" value = "return" type = "submit") Return to Homepage

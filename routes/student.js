@@ -7,10 +7,7 @@ var path = require('path');
 var fs = require('fs');
 
 var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
-
-function change(){
-    console.loc("HI");
-}
+var courses = [];
 
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'student') {
@@ -24,33 +21,36 @@ var sessionChecker = (req, res, next) => {
 
 router.route('/')
 	.get(sessionChecker, (req, res) => {
-        var courses = [];
-        connection.query('SELECT * FROM has_enrolled', (error, results, fields) => {
-            if(results.length != 0){
-            for(i=0; i<results.length; i++){
-                console.log(results[i].class_id); 
-            connection.query('SELECT course_id FROM classes WHERE class_id=?;', [results[i].class_id], (error, results, fields) => {
-               console.log(results[0]);
-               if(results.length != 0){
-                connection.query('SELECT course_name FROM courses WHERE course_id=?;', [results1[0]], (error, results, fields) => {
-                    if(results.length != 0){
-                    console.log(results[0]);
-                    courses.push((results[0])); 
-                    }
-                })
-            } 
-            })
+        connection.query('SELECT * FROM has_enrolled WHERE student_id=?;', [req.session.user.user_id], (error, results, fields) => {
+            for(i = 0; i < results.length; i++){
+            connection.query('SELECT * FROM classes WHERE class_id=?;', [results[i].class_id], (error,results,fields) => {
+                if(results.length != 0){
+               connection.query('SELECT * FROM courses WHERE course_id=?;', [results[0].course_id], (error, results,fields) => {
+                   courses.push(results[0]);
+               })
+            }
+           })
         }
-    }
-        })
-
-        var coursesS = JSON.parse(JSON.stringify(courses));
-		res.render('studentHome', { name: req.session.user.first_name, courses: courses});
-	})
+        res.render('studentHome');
+    })
+})
 	.post((req, res) => {
-		res.redirect('/student/'+req.body.button_id);
+            res.redirect('/student/'+req.body.button_id);
     })
 
+
+router.route('/showCourses').get(sessionChecker, (req,res) => {
+    var coursesNew = JSON.parse(JSON.stringify(courses));
+    res.render('studentCourses', {courses:coursesNew, name:req.session.user.first_name})
+}).post((req,res) => {
+    console.log('why');
+    var buttonPressed = req.body.button_id;
+    console.log(buttonPressed);
+    if(buttonPressed=="return"){
+
+        res.redirect('/');
+    }
+})
 
 router.route('/courseRegistration')
     .get(sessionChecker, (req, res) => {
@@ -74,6 +74,18 @@ router.route('/courseRegistration')
                     res.render('courseRegistration', {courses:courses, classes:classes, courseSelected:courseSelected})
                 })
             })
+        }
+        var class_id = req.body.class_id;
+
+        if(buttonPressed = "submit" && class_id != "void"){
+            connection.query('SELECT * FROM has_enrolled WHERE class_id=? && student_id=?;',[class_id, req.session.user.user_id], (error, results, fields) => {
+                var results = JSON.parse(JSON.stringify(results));
+                if(results.length == 0){
+                    connection.query('INSERT INTO `has_enrolled` (`class_id`, `student_id`) VALUES ( \''+class_id+'\',\''+req.session.user.user_id+'\');');
+
+                }
+            })
+            res.redirect('/')
         }
     })
 
