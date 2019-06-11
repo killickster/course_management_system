@@ -8,7 +8,7 @@ block content
 			select(name="course_id")
 				option(value="void") #{"select a course"}
 					each course in courses
-						option(value=course.course_id, selected = courseSelected == course.course_id) #{course.course_name}
+						option(value=course.course_id, selected = courseSelected == course.course_id) #{course.dept_abbv} #{course.course_num} - #{course.course_name}
 		div.for-group
 			button(name = "button_id" value = "select" type = "submit") Select
 		div.form-group

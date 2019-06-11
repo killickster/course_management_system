@@ -21,6 +21,9 @@ var sessionChecker = (req, res, next) => {
 	}
 };
 
+var updatePrereqs = (req, res) => {
+	};
+
 router.route('/')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.loginMessage;
@@ -76,24 +79,69 @@ router.route('/newUser')
 		}
 	});
 
-
+router.route('/editPrereq').get(sessionChecker, (req,res) => {
+	connection.query('SELECT courses.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses, departments WHERE courses.dept_id = departments.dept_id', (error, results, fields) => {
+		req.session.courseSelected = 0;
+		req.session.courses = JSON.parse(JSON.stringify(results));
+		res.render('editPrereq', { courses:req.session.courses, courseSelected:req.session.courseSelected});
+	})
+}).post((req, res) => {
+	if (req.session.courseSelected == 0) {
+		req.session.selected_course = JSON.parse(req.body.course_selected);
+		req.session.courseSelected = req.session.selected_course.course_id;
+	}
+	var courseSelected = req.session.selected_course.course_id;
+	var buttonPressed = req.body.button_id;
+	if(buttonPressed == 'select' && courseSelected != 0){
+		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
+			var prereq_ids = prereqs.map(a => a.prereq_id);
+			connection.query('SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id NOT IN (' + prereq_ids.join(',') + ') AND courses.course_id != ? AND departments.dept_id = courses.dept_id', req.session.courseSelected, (error, notPrereqs, fields) => {
+				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
+			})
+		})
+	} else if(buttonPressed == 'add'){
+		console.log(req.body.course_to_add);
+		var prereqToAdd = JSON.parse(req.body.course_to_add);
+		var prereqToAddId = prereqToAdd.course_id;
+		connection.query('INSERT INTO prereqs (course_id, prereq_id) VALUES (?, ?)', [courseSelected, prereqToAddId]);
+		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
+			var prereq_ids = prereqs.map(a => a.prereq_id);
+			console.log(prereq_ids.join(','));
+			connection.query('SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id NOT IN (' + prereq_ids.join(',') + ') AND courses.course_id != ? AND departments.dept_id = courses.dept_id', req.session.courseSelected, (error, notPrereqs, fields) => {
+				console.log(notPrereqs);
+				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
+			})
+		})
+	} else if(buttonPressed.startsWith('remove')){
+		var prereqIdToRemove = parseInt(buttonPressed.replace('remove',''));
+		connection.query('DELETE FROM prereqs WHERE course_id = ? AND prereq_id = ?', [courseSelected, prereqIdToRemove]);
+		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
+			var prereq_ids = prereqs.map(a => a.prereq_id);
+			console.log(prereq_ids.join(','));
+			connection.query('SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id NOT IN (' + prereq_ids.join(',') + ') AND courses.course_id != ? AND departments.dept_id = courses.dept_id', req.session.courseSelected, (error, notPrereqs, fields) => {
+				console.log(notPrereqs);
+				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
+			})
+		})
+	} else {
+			req.session.courses = undefined;
+			delete(req.session.courses);
+			res.redirect('/');
+	}
+})
+	
 router.route('/newClass').get(sessionChecker, (req,res) => {
-
-	connection.query('SELECT * FROM courses', (error, results, fields) => {
+	connection.query('SELECT courses.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses, departments WHERE courses.dept_id = departments.dept_id', (error, results, fields) => {
 		var courseSelected = 0;
-		var courses = JSON.parse(JSON.stringify(results));
-		res.render('newClass', {courses:courses, courseSelected:courseSelected});
+		req.session.courses = JSON.parse(JSON.stringify(results));
+		res.render('newClass', {courses:req.session.courses, courseSelected:courseSelected});
 	})
 }).post((req, res) => {
 	var buttonPressed = req.body.button_id;
 	var course_id = req.body.course_id;
-	if(buttonPressed== 'select' && course_id[0] != "void"){
-		connection.query('Select * FROM courses', (error, results, fields) => {
-			var courseSelected=course_id;
-			var courses = JSON.parse(JSON.stringify(results));
-			res.render('newClass',{courses:courses,courseSelected:courseSelected} )
-		})
-
+	if(buttonPressed== 'select' && course_id[0] != "void"){		
+		var courseSelected = course_id;
+		res.render('newClass',{courses:req.session.courses,courseSelected:courseSelected} )
 	}
 	else if(buttonPressed=='submit'){
 		var schoolYear = req.body.year;
@@ -106,6 +154,8 @@ router.route('/newClass').get(sessionChecker, (req,res) => {
 			res.redirect('newClass');
 		}
 	} else {
+			req.session.courses = undefined;
+			delete(req.session.courses);
 			res.redirect('/');
 	}
 })
