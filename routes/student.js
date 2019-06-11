@@ -46,8 +46,7 @@ router.route('/showCourses').get(sessionChecker, (req,res) => {
     console.log('why');
     var buttonPressed = req.body.button_id;
     console.log(buttonPressed);
-    if(buttonPressed=="return"){
-
+    if(buttonPressed=='return'){
         res.redirect('/');
     }
 })
@@ -65,6 +64,7 @@ router.route('/courseRegistration')
     }).post((req, res) => {
         var buttonPressed = req.body.button_id;
         var course_id = req.body.course_id;
+        var class_id = req.body.class_id;
         if(buttonPressed = "select" && course_id != "void"){
             connection.query('SELECT * FROM classes WHERE course_id=?;', [course_id], (error, results, fields) => {
                 var classes = JSON.parse(JSON.stringify(results));
@@ -74,19 +74,20 @@ router.route('/courseRegistration')
                     res.render('courseRegistration', {courses:courses, classes:classes, courseSelected:courseSelected})
                 })
             })
-        }
-        var class_id = req.body.class_id;
+        }else if(buttonPressed = "submit" && class_id != "void"){
 
-        if(buttonPressed = "submit" && class_id != "void"){
             connection.query('SELECT * FROM has_enrolled WHERE class_id=? && student_id=?;',[class_id, req.session.user.user_id], (error, results, fields) => {
                 var results = JSON.parse(JSON.stringify(results));
                 if(results.length == 0){
                     connection.query('INSERT INTO `has_enrolled` (`class_id`, `student_id`) VALUES ( \''+class_id+'\',\''+req.session.user.user_id+'\');');
 
                 }
+                res.render('courseRegistration', {courses:courses, classes:[], courseSelected:"false"} )
             })
-            res.redirect('/')
+        } else {
+            res.redirect('/');
         }
+    
     })
 
 
