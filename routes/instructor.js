@@ -8,7 +8,9 @@ var fs = require('fs');
 
 var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
 
+router.use(bodyParser.urlencoded({extended:false}))
 
+router.use(bodyParser.json())
 
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'instructor') {
@@ -20,21 +22,13 @@ var sessionChecker = (req, res, next) => {
 	}
 };
 
-
-router.route('/')
-	.get(sessionChecker, (req, res) => {
+router.get('/', sessionChecker, (req, res) => {
 		res.render('instructorHome', { name: req.session.user.first_name});
 	})
-	.post((req, res) => {
-		res.redirect('/instructor/'+req.body.button_id);
-    })
+
    
-router.route('/logout')
-	.get((req, res) => {
-		req.session.user = undefined;
-		delete(req.session.user);
-		req.session.loginMessage = 'loggedOut';
-		res.redirect('/login');
+router.post('/', (req,res) => {
+		console.log(req)
     })
     
 module.exports = router;
