@@ -94,21 +94,26 @@ router.route('/editPrereq').get(sessionChecker, (req,res) => {
 	var buttonPressed = req.body.button_id;
 	if(buttonPressed == 'select' && courseSelected != 0){
 		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
-			var prereq_ids = prereqs.map(a => a.prereq_id);
-			connection.query('SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id NOT IN (' + prereq_ids.join(',') + ') AND courses.course_id != ? AND departments.dept_id = courses.dept_id', req.session.courseSelected, (error, notPrereqs, fields) => {
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id != ? AND departments.dept_id = courses.dept_id';
+			if (prereqs.length > 0) {
+				var prereq_ids = prereqs.map(a => a.prereq_id);
+				q = q + ' AND courses.course_id NOT IN (' + prereq_ids.join(',') + ')';
+			}
+			connection.query(q, req.session.courseSelected, (error, notPrereqs, fields) => {
 				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
 			})
 		})
 	} else if(buttonPressed == 'add'){
-		console.log(req.body.course_to_add);
 		var prereqToAdd = JSON.parse(req.body.course_to_add);
 		var prereqToAddId = prereqToAdd.course_id;
 		connection.query('INSERT INTO prereqs (course_id, prereq_id) VALUES (?, ?)', [courseSelected, prereqToAddId]);
 		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
-			var prereq_ids = prereqs.map(a => a.prereq_id);
-			console.log(prereq_ids.join(','));
-			connection.query('SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id NOT IN (' + prereq_ids.join(',') + ') AND courses.course_id != ? AND departments.dept_id = courses.dept_id', req.session.courseSelected, (error, notPrereqs, fields) => {
-				console.log(notPrereqs);
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id != ? AND departments.dept_id = courses.dept_id';
+			if (prereqs.length > 0) {
+				var prereq_ids = prereqs.map(a => a.prereq_id);
+				q = q + ' AND courses.course_id NOT IN (' + prereq_ids.join(',') + ')';
+			}
+			connection.query(q, req.session.courseSelected, (error, notPrereqs, fields) => {
 				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
 			})
 		})
@@ -116,15 +121,75 @@ router.route('/editPrereq').get(sessionChecker, (req,res) => {
 		var prereqIdToRemove = parseInt(buttonPressed.replace('remove',''));
 		connection.query('DELETE FROM prereqs WHERE course_id = ? AND prereq_id = ?', [courseSelected, prereqIdToRemove]);
 		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
-			var prereq_ids = prereqs.map(a => a.prereq_id);
-			console.log(prereq_ids.join(','));
-			connection.query('SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id NOT IN (' + prereq_ids.join(',') + ') AND courses.course_id != ? AND departments.dept_id = courses.dept_id', req.session.courseSelected, (error, notPrereqs, fields) => {
-				console.log(notPrereqs);
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id != ? AND departments.dept_id = courses.dept_id';
+			if (prereqs.length > 0) {
+				var prereq_ids = prereqs.map(a => a.prereq_id);
+				q = q + ' AND courses.course_id NOT IN (' + prereq_ids.join(',') + ')';
+			}
+			connection.query(q, req.session.courseSelected, (error, notPrereqs, fields) => {
 				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
 			})
 		})
 	} else {
 			req.session.courses = undefined;
+			delete(req.session.courses);
+			res.redirect('/');
+	}
+})
+
+router.route('/editProgram').get(sessionChecker, (req,res) => {
+	connection.query('SELECT program_id, program_name, program_abbv FROM programs', (error, results, fields) => {
+		req.session.programSelected = 0;
+		req.session.programs = JSON.parse(JSON.stringify(results));
+		res.render('editProgram', { programs:req.session.programs, programSelected:req.session.programSelected});
+	})
+}).post((req, res) => {
+	if (req.session.programSelected == 0) {
+		req.session.selected_program = JSON.parse(req.body.program_selected);
+		req.session.programSelected = req.session.selected_program.program_id;
+	}
+	var programSelected = req.session.selected_program.program_id;
+	var buttonPressed = req.body.button_id;
+	if(buttonPressed == 'select' && programSelected != 0){
+		connection.query('SELECT courses.course_id, dept_abbv, course_num, course_name FROM program_has, courses, departments WHERE program_has.program_id = ? and program_has.course_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.programSelected, (error, requirements, fields) => {
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE departments.dept_id = courses.dept_id';
+			if (requirements.length > 0) {
+				var requirement_ids = requirements.map(a => a.course_id);
+				q = q +  ' AND courses.course_id  NOT IN (' + requirement_ids.join(',') + ')';
+			}
+			connection.query(q, (error, notRequirements, fields) => {
+				res.render('editProgram',{ programSelected : programSelected, selected_program : req.session.selected_program, requirements : requirements, notRequirements : notRequirements } );
+			})
+		})
+	} else if(buttonPressed == 'add'){
+		var requirementToAdd = JSON.parse(req.body.course_to_add);
+		var requirementToAddId = requirementToAdd.course_id;
+		connection.query('INSERT INTO program_has (program_id, course_id) VALUES (?, ?)', [programSelected, requirementToAddId]);
+		connection.query('SELECT courses.course_id, dept_abbv, course_num, course_name FROM program_has, courses, departments WHERE program_has.program_id = ? and program_has.course_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.programSelected, (error, requirements, fields) => {
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE departments.dept_id = courses.dept_id';
+			if (requirements.length > 0) {
+				var requirement_ids = requirements.map(a => a.course_id);
+				q = q +  ' AND courses.course_id  NOT IN (' + requirement_ids.join(',') + ')';
+			}
+			connection.query(q, (error, notRequirements, fields) => {
+				res.render('editProgram',{ programSelected : programSelected, selected_program : req.session.selected_program, requirements : requirements, notRequirements : notRequirements } );
+			})
+		})
+	} else if(buttonPressed.startsWith('remove')){
+		var requirementIdToRemove = parseInt(buttonPressed.replace('remove',''));
+		connection.query('DELETE FROM program_has WHERE program_id = ? AND course_id = ?', [programSelected, requirementIdToRemove]);
+		connection.query('SELECT courses.course_id, dept_abbv, course_num, course_name FROM program_has, courses, departments WHERE program_has.program_id = ? and program_has.course_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.programSelected, (error, requirements, fields) => {
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE departments.dept_id = courses.dept_id';
+			if (requirements.length > 0) {
+				var requirement_ids = requirements.map(a => a.course_id);
+				q = q +  ' AND courses.course_id  NOT IN (' + requirement_ids.join(',') + ')';
+			}
+			connection.query(q, (error, notRequirements, fields) => {
+				res.render('editProgram',{ programSelected : programSelected, selected_program : req.session.selected_program, requirements : requirements, notRequirements : notRequirements } );
+			})
+		})
+	} else {
+			req.session.programs = undefined;
 			delete(req.session.courses);
 			res.redirect('/');
 	}
@@ -220,7 +285,6 @@ router.route('/newCourse')
 		if (course_desc == undefined) course_desc = "";
 		var course_len = req.body.len;
 		if(buttonPressed == "submit") {
-			console.log(req.body.len);
 			if (course_name && course_num) {
 				connection.query('SELECT * FROM courses WHERE dept_id = ? AND course_num = ?', [dept_id, course_num] , function (error, results, fields) {
 					if(results.length == 0) {
