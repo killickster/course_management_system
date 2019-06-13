@@ -1,0 +1,8 @@
+extends layout.pug
+
+block content
+    ul
+        each val in classes
+            li(id=val.class_id)
+            = val.name
+            button(name = "button_id" value = "display", type = "submit" onClick="selectCourse(" + val.class_id + ");") Request

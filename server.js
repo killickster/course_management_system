@@ -81,8 +81,13 @@ app.get('/roles', (req, res) => {
 			req.session.user.courses = [];
 		}
 		
-	console.log('fired')
+		if(req.session.user.role == 'instructor'){
+
+			res.redirect('/' + req.session.user.role + '/home');
+		}else{
+
 		res.redirect('/' + req.session.user.role);
+		}
 	});
 	
 

@@ -1,11 +1,46 @@
-var clicked = function(){
+var logout = function(){
     $.ajax({
         type: 'POST',
-        url: '/',
-        success: function(){
+        url: 'logout/',
+        success: function(path){
+            window.location = path
         }
-    }).done(function(response) {
+    })
+}
 
+var displayCourses = function(){
+    $.ajax({
+        type: 'POST',
+        url: 'displayCourses/',
+        success: function(courses){
+            alert('hi')
+        }
+    })
+}
+
+var searchClasses = function(){
+    $.ajax({
+        type: 'POST',
+        url: 'searchClasses/',
+        success: function(path){
+            window.location = path
+
+        }
+    })
+}
+
+var selectCourse = function(class_id){
+    
+    selected = {class_id:class_id}
+    $.ajax({
+        type: 'POST',
+        url: 'requestClass/',
+        data: selected,
+        success: function(result){
+            var elem = document.getElementById(result)
+            elem.parentElement.remove(elem)
+        }
     })
 
 }
+

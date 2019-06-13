@@ -1,13 +1,6 @@
-doctype html
-
-html
-    head
-        title = "Hello pug"
-        script(src='/script.js')
-        |<script
-        |src="https://code.jquery.com/jquery-3.4.1.js"
-        |integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
-        |crossorigin="anonymous"></script>
-    body
-        p Please select one of the options below.
-        button(name = "button_id" value = "logout" type = "submit" onClick="clicked()") Logout
+extends layout.pug
+block content
+    p Please select one of the options below.
+    button(name = "button_id" value = "searchClasses", type = "submit" onClick="searchClasses()") Search Classes
+    button(name = "button_id" value = "display", type = "submit" onClick="displayCourses()") Display Courses
+    button(name = "button_id" value = "logout" type = "submit" onClick="logout()") Logout
