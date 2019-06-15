@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `classes` (
 	`course_id` int(11) UNSIGNED NOT NULL REFERENCES `courses`(`course_id`),
 	`schoolyear` year(4) NOT NULL,
 	`sect` int(11) UNSIGNED NOT NULL,
-	`sect_type` ENUM('lecture, tutorial, lab') NOT NULL,
+	`sect_type` ENUM('lecture', 'tutorial', 'lab') NOT NULL,
 	`sess_start` ENUM('0', '1', '2', '3', '4', '5', '6', '7', '8') NOT NULL
 );
 
