@@ -15,7 +15,7 @@ router.use(bodyParser.json())
 
 
 router.get('/classes', (req,res) => {
-    console.log(req.session.user.allClasses)
+    //console.log(req.session.user.allClasses)
     res.render('requestClasses.pug',{classes:req.session.user.allClasses})
     
 })
@@ -31,7 +31,9 @@ router.post('/requestClass', (req,res) => {
         }
     })
 
-    res.json(class_id);
+    console.log(class_id)
+
+    res.json(class_id)
 
 
 

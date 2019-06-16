@@ -38,8 +38,9 @@ var selectCourse = function(class_id){
         data: selected,
         success: function(result){
             var elem = document.getElementById(result)
-            elem.parentElement.remove(elem)
+            elem.remove()
         }
+    }).done(function(){
     })
 
 }
