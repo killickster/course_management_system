@@ -13,23 +13,14 @@ router.use(bodyParser.urlencoded({extended:false}))
 
 router.use(bodyParser.json())
 
-
 router.get('/classes', (req,res) => {
-    //console.log(req.session.user.allClasses)
+
     res.render('requestClasses.pug',{classes:req.session.user.allClasses})
-
-
-	req.session.user.allClasses.forEach(function(elem){
-		console.log(elem)
-
-	})
     
 })
 
-
 router.post('/requestClass', (req,res) => {
 
-    console.log('requested')
     var instructor_id = req.session.user.user_id;
     var class_id = req.body.class_id;
     
@@ -40,16 +31,13 @@ router.post('/requestClass', (req,res) => {
         }
     })
 
-    var allClasses = req.session.user.allClasses.filter(function(element){
-        return element.class_id == class_id
+    req.session.user.allClasses = req.session.user.allClasses.filter(function(element){
+        return !(element.class_id == class_id)
     });
 
-    console.log(allClasses)
+    req.session.save()
 
     res.json(class_id)
-
-
-
 })
 
 module.exports = router;
