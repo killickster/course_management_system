@@ -16,7 +16,6 @@ router.use(bodyParser.urlencoded({extended:false}))
 router.use(bodyParser.json())
 
 var sessionChecker = (req, res, next) => {
-	//console.log('hi')
 	if (!req.session.user || req.session.user.role != 'instructor') {
 		req.session.loginMessage = 'noAccess';
 		res.redirect('/login');
@@ -67,15 +66,17 @@ router.post('/searchClasses', (req,res) => {
 
         for(i = 0; i < results.length; i++){
 			if(!doNotDisplay.includes(results[i].class_id)){
-			var class_id = results[i].class_id;
-            var course_id = results[i].course_id;
-			var section = results[i].sect;
+			var course_id = results[i].course_id;
+			const section = results[i].sect;
+			const class_id = results[i].class_id;
             connection.query('SELECT * FROM courses WHERE course_id=?;',[course_id], (error, results, fields)=> {
 				req.session.user.allClasses.push({class_id:class_id, name:results[0].course_name, section:section, number:results[0].course_num})
 				req.session.save();
             } )
 		}
 	}
+
+
     })
 	res.json('/instructor/requestClasses/classes')
 })

@@ -1,9 +1,7 @@
 extends layout.pug
 
 block content
-    table(style='width:100%', border='1')
+    ul#todo
         each val in classes
-            tr(id=val.class_id)
-                th= val.name
-                th
-                    button(name = "button" value = "display", type = "submit" onClick="selectCourse(" + val.class_id + ");") Reques
+            li(id=val.class_id)= val.name
+                button(type='submit' onClick='selectCourse('+val.class_id+')') Request
