@@ -1,0 +1,7 @@
+extends layout.pug
+
+
+block content
+    ul#todo
+        each val in classes
+            li(id=val.class_id)= val.name

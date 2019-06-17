@@ -15,7 +15,7 @@ router.use(bodyParser.json())
 
 router.get('/classes', (req,res) => {
 
-    res.render('requestClasses.pug',{classes:req.session.user.allClasses})
+    res.render('requestClasses.pug',{classes:req.session.user.allAvailableClasses})
     
 })
 
@@ -31,7 +31,7 @@ router.post('/requestClass', (req,res) => {
         }
     })
 
-    req.session.user.allClasses = req.session.user.allClasses.filter(function(element){
+    req.session.user.allClasses = req.session.user.allAvailableClasses.filter(function(element){
         return !(element.class_id == class_id)
     });
 

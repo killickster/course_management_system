@@ -11,9 +11,9 @@ var logout = function(){
 var displayCourses = function(){
     $.ajax({
         type: 'POST',
-        url: 'displayCourses/',
-        success: function(courses){
-            alert('hi')
+        url: 'displayClasses/',
+        success: function(path){
+            window.location = path
         }
     })
 }
