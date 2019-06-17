@@ -30,6 +30,10 @@ var sessionChecker = (req, res, next) => {
 router.get('/home', sessionChecker, (req, res) => {
 	res.render('instructorHome', { searchClasses: false, name: req.session.user.first_name});
 	
+	connection.query('SELECT * FROM teach_request WHERE instructor_id=?', [req.session.user.user_id], (error, results, fields) => {
+		req.session.user.requestedClasses = results;
+	})
+
 	//Initalize session variable which holds classes this instructor is teaching
 	req.session.user.classesTeaching = [];
 
@@ -92,6 +96,10 @@ router.post('/searchClasses', (req,res) => {
 	})
 
 	req.session.user.allAvailableClasses.forEach((val) => {
+		notAvailble.push(val.class_id)
+	})
+
+	req.session.user.requestedClasses.forEach((val) => {
 		notAvailble.push(val.class_id)
 	})
 

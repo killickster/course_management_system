@@ -23,7 +23,11 @@ router.post('/requestClass', (req,res) => {
 
     var instructor_id = req.session.user.user_id;
     var class_id = req.body.class_id;
-    
+
+    req.session.user.allAvailableClasses = req.session.user.allAvailableClasses.filter((val) => {
+        return !(val.class_id==class_id)
+    })
+   
 
     connection.query('SELECT * FROM teach_request WHERE instructor_id=? AND class_id=?', [instructor_id, class_id], (error, results, fields) => {
         if(results.length == 0){
