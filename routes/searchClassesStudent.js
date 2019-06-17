@@ -50,6 +50,7 @@ router.get('/classes', (req,res) => {
 
 router.post('/requestClass', (req,res) => {
     var class_id = req.body.class_id;
+    var can = false;
 
     connection.query('SELECT * FROM classes WHERE class_id=?',[class_id], (error,results,fields) => {
         if(!req.session.user.uneligible.includes(results[0].course_id)){
@@ -60,15 +61,19 @@ router.post('/requestClass', (req,res) => {
 
                     console.log('registering')
                     connection.query('INSERT INTO `has_enrolled` (`class_id`, `student_id`) VALUES ( \''+class_id+'\',\''+req.session.user.user_id+'\')');
-                    req.session.user.classes = req.session.user.classes.filter((val) => {
-                        console.log(val.class_id === class_id)
-                        return (val.class_id === class_id);
+                    req.session.user.availibleClasses = req.session.user.availibleClasses.filter((val) => {
+                        return !(val.class_id == class_id)
                     })
+                    res.json(class_id)
+                    return;
+                    console.log(req.session.user.availibleClasses)
                 }
     })
+    }else{
+        res.json('unable')
     }
-    console.log(req.session.user.uneligible)
 })
+
 
 })
 

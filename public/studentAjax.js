@@ -16,8 +16,15 @@ var selectCourse = function(class_id){
             type: 'POST',
             url: 'requestClass/',
             data:selected,
-            success(){
+            success(id){
 
+                if(id=='unable'){
+                    document.getElementById('message').innerText = "Unable to register for this course"
+                }else{
+                    document.getElementById('message').innerText = "Registered" 
+                    var elem = document.getElementById(id)
+                    elem.remove();
+                }
             }
         }
     )

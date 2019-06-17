@@ -3,6 +3,7 @@ extends layout.pug
 block content
 
     script(src='/studentAjax.js')
+    p(id='message')
     ul#todo
         each val in classes
             li(id=val.class_id)= val.name
