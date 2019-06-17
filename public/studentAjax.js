@@ -50,3 +50,14 @@ var returnHome = function(){
         }
     })
 }
+
+
+var logout = function(){
+    $.ajax({
+        type: 'POST',
+        url: 'logout/',
+        success: function(path){
+            window.location = path
+        }
+    })
+}

@@ -98,7 +98,6 @@ router.post('/searchClasses', (req,res) => {
 
 
 router.post('/viewClasses', (req,res) => {
-
     res.json('/student/studentClasses/classes')
 })
 
@@ -176,7 +175,8 @@ router.route('/courseRegistration')
 router.post('/logout', (req, res) => {
 		req.session.user = undefined;
         delete(req.session.user);
-		req.session.loginMessage = 'loggedOut';
+        req.session.loginMessage = 'loggedOut';
+        res.json('/')
 	})
     
 
