@@ -5,7 +5,7 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
 var fs = require('fs');
-var searchClasses = require('./searchClasses.js')
+var searchClasses = require('./searchClassesInstructor.js')
 var displayClasses = require('./instructorClasses.js')
 
 router.use('/requestClasses', searchClasses)

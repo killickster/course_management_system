@@ -1,0 +1,10 @@
+extends layout.pug
+
+block content
+
+    script(src='/studentAjax.js')
+    ul#todo
+        each val in classes
+            li(id=val.class_id)= val.name
+                button(type='submit' onClick='selectCourse('+val.class_id+')') Request
+    button(type='submit' onClick='returnHome()') Return to Homepage

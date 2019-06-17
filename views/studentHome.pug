@@ -1,15 +1,12 @@
 extends layout.pug
 
+
+
 block content
+	script(src='/studentAjax.js')
 	p Welcome #{name}!
 	p Please select one of the options below.
-	form(method = "post" action = "/student")
-		div.form-group
-			button(name = "button_id" value = "logout" type = "submit") Logout
-		div.form-group
-			button(name = "button_id" value = "courseRegistration" type = "submit") Register
-		div.form-group
-			button(name = "button_id" value = "showCourses" type = "submit") Show Courses
+	button(name = "button_id" value = "register" type = "submit" onClick='register()') Register
 
 
 
