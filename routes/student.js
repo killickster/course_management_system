@@ -20,8 +20,11 @@ var sessionChecker = (req, res, next) => {
 	}
 };
 
-router.route('/')
+router.route('/home')
 	.get(sessionChecker, (req, res) => {
+
+        
+
         connection.query('SELECT * FROM has_enrolled WHERE student_id=?;', [req.session.user.user_id], (error, results, fields) => {
             for(i = 0; i < results.length; i++){
             connection.query('SELECT * FROM classes WHERE class_id=?;', [results[i].class_id], (error,results,fields) => {
@@ -44,7 +47,9 @@ router.route('/')
         res.render('studentHome');
     })
 })
-	.post((req, res) => {
+    
+
+router.post((req, res) => {
             res.redirect('/student/'+req.body.button_id);
     })
 
@@ -52,7 +57,11 @@ router.route('/')
 router.route('/showCourses').get(sessionChecker, (req,res) => {
     var coursesNew = JSON.parse(JSON.stringify(req.session.user.courses));
     res.render('studentCourses', {courses:coursesNew, name:req.session.user.first_name})
-}).post((req,res) => {
+})
+
+
+
+router.post((req,res) => {
     var buttonPressed = req.body.button_id;
     console.log(buttonPressed);
     if(buttonPressed=='return'){
@@ -70,7 +79,10 @@ router.route('/courseRegistration')
         })
 
 
-    }).post((req, res) => {
+    })
+    
+    
+ router.post((req, res) => {
         var buttonPressed = req.body.button_id;
         var course_id = req.body.course_id;
         var class_id = req.body.class_id;

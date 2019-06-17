@@ -44,6 +44,7 @@ router.get('/home', sessionChecker, (req, res) => {
 	connection.query('SELECT * FROM has_teaching WHERE instructor_id=?;', [userId], (error, results, fields) => {
 
 		for(i = 0; i < results.length; i++){
+
 			connection.query('SELECT * FROM classes WHERE class_id=?', [results[i].class_id], (error,results,fields)=> {
 
 			var course_id = results[0].course_id;

@@ -44,4 +44,9 @@ router.post('/requestClass', (req,res) => {
     res.json(class_id)
 })
 
+router.post('/returnHome', (req,res) => {
+    console.log('logging off');
+    res.json('/instructor/home')
+})
+
 module.exports = router;

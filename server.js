@@ -81,7 +81,7 @@ app.get('/roles', (req, res) => {
 			req.session.user.courses = [];
 		}
 		
-		if(req.session.user.role == 'instructor'){
+		if(req.session.user.role != 'admin'){
 
 			res.redirect('/' + req.session.user.role + '/home');
 		}else{

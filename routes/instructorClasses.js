@@ -16,4 +16,8 @@ router.get('/classes', (req,res) => {
     res.render('instructorsClasses.pug', {classes:req.session.user.classesTeaching})
 })
 
+router.post('/returnHome', (req,res) => {
+   res.json('/instructor/home')
+})
+
 module.exports = router;
