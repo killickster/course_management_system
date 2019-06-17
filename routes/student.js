@@ -5,6 +5,7 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
 var searchClasses = require('./searchClassesStudent.js')
+var studentClasses = require('./studentClasses.js')
 var fs = require('fs');
 
 var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
@@ -14,6 +15,7 @@ router.use(bodyParser.urlencoded({extended:false}))
 router.use(bodyParser.json())
 
 router.use('/searchClasses', searchClasses)
+router.use('/studentClasses', studentClasses)
 
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'student') {
@@ -92,6 +94,12 @@ router.post('/searchClasses', (req,res) => {
 
 
 
+})
+
+
+router.post('/viewClasses', (req,res) => {
+
+    res.json('/student/studentClasses/classes')
 })
 
 
