@@ -1,0 +1,24 @@
+extends layout.pug
+
+block content
+	form(method = "post" action = "/admin/approveRequests")
+		if(requests.length > 0)
+			p The following instructors have requested to teach courses.
+			table(style = 'width:100%', border ='1')
+				tr
+					th Instructor Name
+					th Course Name
+					th Class ID
+					th Options
+				for request in requests
+					tr
+						td #{request.first_name} #{request.last_name}
+						td #{request.dept_abbv} #{request.course_num}
+						td #{request.class_id}
+						td
+							button(name = "button_id" value = {'action' : 'approve', 'class_id' : request.class_id, 'instructor_id' : request.user_id } type = "submit") Approve
+							button(name = "button_id" value = {'action' : 'deny', 'class_id' : request.class_id, 'instructor_id' : request.user_id } type = "submit") Deny
+		else
+			p No requests have been submitted.
+		div.form-group
+			button(name="button_id" value= {'action' : 'cancel'} type="submit") Return to Homepage

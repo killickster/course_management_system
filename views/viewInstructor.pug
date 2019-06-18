@@ -1,0 +1,27 @@
+extends layout.pug
+
+block content
+	form(method = "post" action = "/admin/viewInstructor")
+		p Select an instructor to view their course load.
+		div.form-group
+			select(name="instructor_selected")
+				option(value="void") #{"Select an instructor"}
+				each instructor in instructors
+					option(value = instructor, selected = instructorSelected == instructor.user_id) #{instructor.first_name} #{instructor.last_name}
+		div.form-group
+			button(name = "button_id" value = "select" type = "submit") Select
+		if(instructorSelected != 0)
+			if(classes.length > 0)
+				p #{selectedInstructor.first_name} #{selectedInstructor.last_name}'s courses:
+				table(style = 'width:100%', border ='1')
+					tr
+						th Course Name
+						th Class ID
+					for aclass in classes
+						tr
+							td #{aclass.dept_abbv} #{aclass.course_num}
+							td #{aclass.class_id}				
+			else
+				p #{selectedInstructor.first_name} #{selectedInstructor.last_name} is not currently teaching any courses.
+		div.form-group
+			button(name="button_id" value= 'cancel' type="submit") Return to Homepage

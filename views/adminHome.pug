@@ -1,6 +1,8 @@
 extends layout.pug
 
 block content
+	if message == 'noAccess'
+		p You do not have access to that page.
 	p Welcome #{name}!
 	p Please select one of the options below.
 	form(method = "post" action = "/admin")
@@ -10,10 +12,17 @@ block content
 			button(name = "button_id" value = "newDept" type = "submit") Create New Department
 		div.form-group
 			button(name = "button_id" value = "newCourse" type = "submit") Add Course to Catalogue
+			button(name = "button_id" value = "editPrereq" type = "submit") Add/Remove Course Prerequisites
 		div.form-group
-			button(name = "button_id" value = "newClass" type="submit") Add Class for a Course
+			button(name = "button_id" value = "newClass" type = "submit") Add New Class to Course
+		div.form-group
+			button(name = "button_id" value = "viewInstructor" type = "submit") View Instructor Course Loads
+			button(name = "button_id" value = "approveRequests" type = "submit") Approve Instructor Requests
 		div.form-group
 			button(name = "button_id" value = "newProgram" type = "submit") Add New Program
+			button(name = "button_id" value = "editProgram" type = "submit") Edit Existing Program
+		div.form-group
+			button(name = "button_id" value = "editStudent" type = "submit") Edit Student Information
 		div.form-group
 			button(name = "button_id" value = "changePass" type = "submit") Change Account Password
 		div.form-group

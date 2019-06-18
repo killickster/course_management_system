@@ -4,18 +4,18 @@ var router = express.Router();
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
+var searchClasses = require('./searchClassesStudent.js')
+var studentClasses = require('./studentClasses.js')
+var fs = require('fs');
 
-var connection = mysql.createConnection({
-	host		: 'localhost',
-	user		: 'root',
-	password	: 'paSSword123+',
-	database	: 'cms'
-});
+var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
 
+router.use(bodyParser.urlencoded({extended:false}))
 
-function change(){
-    console.loc("HI");
-}
+router.use(bodyParser.json())
+
+router.use('/searchClasses', searchClasses)
+router.use('/studentClasses', studentClasses)
 
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'student') {
@@ -27,71 +27,89 @@ var sessionChecker = (req, res, next) => {
 	}
 };
 
-router.route('/')
-	.get(sessionChecker, (req, res) => {
-        var courses = [];
-        connection.query('SELECT * FROM has_enrolled', (error, results, fields) => {
+
+
+router.get('/home', sessionChecker, (req,res) => {
+    req.session.user.classes = [];
+
+    connection.query('SELECT * FROM has_enrolled WHERE student_id=?;', [req.session.user.user_id], (error, results, fields) => {
+        for(i = 0; i < results.length; i++){
+        connection.query('SELECT * FROM classes WHERE class_id=?;', [results[i].class_id], (error,results,fields) => {
+            const class_id = results[0].class_id;
+
+            const section = results[0].sect;
             if(results.length != 0){
-            for(i=0; i<results.length; i++){
-                console.log(results[i].class_id); 
-            connection.query('SELECT course_id FROM classes WHERE class_id=?;', [results[i].class_id], (error, results, fields) => {
-               console.log(results[0]);
-               if(results.length != 0){
-                connection.query('SELECT course_name FROM courses WHERE course_id=?;', [results1[0]], (error, results, fields) => {
-                    if(results.length != 0){
-                    console.log(results[0]);
-                    courses.push((results[0])); 
-                    }
-                })
-            } 
-            })
+           connection.query('SELECT * FROM courses WHERE course_id=?;', [results[0].course_id], (error, results,fields) => {
+               var contains = false;
+               for(i = 0; i < req.session.user.courses.length; i++){
+                   if(req.session.user.courses[i].course_id === results[0].course_id){
+                       contains = true;
+                   }
+               }
+
+               if(!contains){
+                    req.session.user.classes.push({class_id:class_id, name:results[0].course_name, section:section, course_num:results[0].course_num});
+               }
+               req.session.save()
+           })
         }
+       })
     }
-        })
+    res.render('studentHome');
+})
 
-        var coursesS = JSON.parse(JSON.stringify(courses));
-		res.render('studentHome', { name: req.session.user.first_name, courses: courses});
-	})
-	.post((req, res) => {
-		res.redirect('/student/'+req.body.button_id);
+
+})
+
+
+
+router.post('/searchClasses', (req,res) => {
+   
+    req.session.user.availibleClasses = [];
+
+    var notAvailible = [];
+
+    req.session.user.classes.forEach((val) => {
+        notAvailible.push(val.class_id)
     })
 
+    connection.query('SELECT * FROM classes;', (error, results, fields) => {
 
-router.route('/courseRegistration')
-    .get(sessionChecker, (req, res) => {
-        connection.query('SELECT * FROM courses', (error, results, fields) => {
-            var courses = JSON.parse(JSON.stringify(results));
-            var classes = [];
-            var courseSelected = "false";
-            res.render('courseRegistration', {courses:courses, classes:classes, courseSelected:courseSelected});
-        })
+        for(i = 0; i < results.length; i++){
+            const section = results[i].sect
+            const class_id = results[i].class_id
 
+            connection.query('SELECT * FROM courses WHERE course_id=?', [results[i].course_id], (error,results,fields) => {
+            
+                if(!notAvailible.includes(class_id)){
+                    req.session.user.availibleClasses.push({class_id:class_id, name:results[0].course_name, section:section, course_num:results[0].course_num})
+                    req.session.save()
+                }
 
-    }).post((req, res) => {
-        var buttonPressed = req.body.button_id;
-        var course_id = req.body.course_id;
-        if(buttonPressed = "select" && course_id != "void"){
-            connection.query('SELECT * FROM classes WHERE course_id=?;', [course_id], (error, results, fields) => {
-                var classes = JSON.parse(JSON.stringify(results));
-                var courseSelected = "true";
-                connection.query('SELECT * FROM courses', (error, results, fields) => {
-                    var courses = JSON.parse(JSON.stringify(results));
-                    res.render('courseRegistration', {courses:courses, classes:classes, courseSelected:courseSelected})
-                })
             })
+
         }
+
     })
 
+    res.json('/student/searchClasses/classes');
 
-router.route('/logout')
-	.get((req, res) => {
+
+
+})
+
+
+router.post('/viewClasses', (req,res) => {
+    res.json('/student/studentClasses/classes')
+})
+
+
+router.post('/logout', (req, res) => {
 		req.session.user = undefined;
-		delete(req.session.user);
-		req.session.loginMessage = 'loggedOut';
-		res.redirect('/login');
-	}).post((req, res) => {
-
-    })
+        delete(req.session.user);
+        req.session.loginMessage = 'loggedOut';
+        res.json('/')
+	})
     
 
 

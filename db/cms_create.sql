@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `classes` (
 	`course_id` int(11) UNSIGNED NOT NULL REFERENCES `courses`(`course_id`),
 	`schoolyear` year(4) NOT NULL,
 	`sect` int(11) UNSIGNED NOT NULL,
-	`sect_type` ENUM('lecture, tutorial, lab') NOT NULL,
+	`sect_type` ENUM('lecture', 'tutorial', 'lab') NOT NULL,
 	`sess_start` ENUM('0', '1', '2', '3', '4', '5', '6', '7', '8') NOT NULL
 );
 
@@ -61,6 +61,17 @@ CREATE TABLE IF NOT EXISTS `has_teaching` (
 	`class_id` int(11) UNSIGNED NOT NULL REFERENCES `classes`(`class_id`),
 	`instructor_id` int(11) UNSIGNED NOT NULL  REFERENCES `users`(`user_id`),
 	`is_main` boolean
+);
+
+CREATE TABLE IF NOT EXISTS `teach_request` (
+	`instructor_id` int(11) UNSIGNED NOT NULL REFERENCES `users`(`user_id`),
+	`class_id` int(11) UNSIGNED NOT NULL REFERENCES `classes`(`class_id`)
+
+);
+
+CREATE TABLE IF NOT EXISTS `courses_taken` (
+	`course_id` int(11) UNSIGNED NOT NULL REFERENCES `courses`(`course_id`),
+	`student_id` int(11) UNSIGNED NOT NULL REFERENCES `users`(`user_id`)
 );
 
 INSERT INTO `users` (`username`, `password`, `first_name`, `last_name`, `role`) VALUES ('admin000', 'adminpass', 'John', 'Anglo', 'admin')

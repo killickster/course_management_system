@@ -11,7 +11,7 @@ block content
 		p Password changed!
 	
 	p Please complete the following form.
-	form(method = "post" action = "/admin/changePass")
+	form(method = "post" action = "/"+role+"/changePass")
 		div.form-group
 			label(for='username') Old Password:
 			input(type = 'password', name = "oldpass")

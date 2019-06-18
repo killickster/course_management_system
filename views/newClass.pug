@@ -2,38 +2,39 @@ extends layout.pug
 
 block content
 
-    
-    p Select a course from the following drop down menu
-    form(method = "post" action = "/admin/newClass")
-        div.form-group
-            select(name="course_id")
-                option(value="void") #{"select a course"}
-                    each course in courses
-                        option(value=course.course_id) #{course.course_name}
-        div.for-group
-            button(name = "button_id" value = "select" type = "submit") Select
-        div.form-group
-        if courseSelected=="true"
-            - const section_types = [{name: 'Lecture', value: 'lecture'}, {name: 'Tutorial', value: 'tutorial'}, {name:'Lab', value: 'lab'}]
-            select(name="section_type")
-                each section_type in section_types
-                    option(value=section_type.value) #{section_type.name}
-        div.for-group
-        if courseSelected=="true"
-            -const section_starts = [{name: "1", value: 1}, {name: "2", value: 2}, {name:"3", value: 3}, {name: "4", value: 4}, {name: "5", value: 5}, {name:"6", value: 6},{name: "7", value: 7}, {name: "8", value: 8}]
-            select(name="section_start")
-                each section_start in section_starts
-                    option(value=section_start.value) #{section_start.name}
-        div.form-group
-        if courseSelected=="true"
-            label(for='year') School Year:
-            input(type = 'text', name = "year")
-        div.form-group
-        if courseSelected=="true"
-            label(for='section') Section:
-            input(type = 'text', name = "section")
-        div.form-group
-        if courseSelected=="true"
-            button(name="button_id" value="submit" type="submit") Submit
+	p Select a course from the following drop down menu.
+	form(method = "post" action = "/admin/newClass")
+		div.form-group
+			select(name="course_id")
+				option(value="void") #{"Select a course"}
+					each course in courses
+						option(value=course.course_id, selected = courseSelected == course.course_id) #{course.dept_abbv} #{course.course_num} - #{course.course_name}
+		div.for-group
+			button(name = "button_id" value = "select" type = "submit") Select
+		div.form-group
+		if courseSelected > 0
+			- const section_types = [{name: 'Lecture', value: 'lecture'}, {name: 'Tutorial', value: 'tutorial'}, {name:'Lab', value: 'lab'}]
+			select(name="section_type")
+				each section_type in section_types
+					option(value=section_type.value) #{section_type.name}
+		div.for-group
+		if courseSelected > 0
+			-const section_starts = [{name: "1", value: 1}, {name: "2", value: 2}, {name:"3", value: 3}, {name: "4", value: 4}, {name: "5", value: 5}, {name:"6", value: 6},{name: "7", value: 7}, {name: "8", value: 8}]
+			select(name="section_start")
+				each section_start in section_starts
+					option(value=section_start.value) #{section_start.name}
+		div.form-group
+		if courseSelected > 0
+			label(for='year') School Year:
+			input(type = 'text', name = "year")
+		div.form-group
+		if courseSelected > 0
+			label(for='section') Section:
+			input(type = 'text', name = "section")
+		div.form-group
+		if courseSelected > 0
+			button(name="button_id" value="submit" type="submit") Submit
+		div.form-group
+			button(name="button_id" value="cancel" type="submit") Return to Homepage
 
-        
+		

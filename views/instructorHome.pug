@@ -1,8 +1,11 @@
 extends layout.pug
-
 block content
-	p Welcome #{name}!
-	p Please select one of the options below.
-	form(method = "post" action = "/instructor")
-		div.form-group
-			button(name = "button_id" value = "logout" type = "submit") Logout
+    p Please select one of the options below.
+    button(name = "button_id" value = "searchClasses", type = "submit" onClick="searchClasses()") Search Classes
+    if(searchClasses)
+        ul#todo
+            each val in classes
+                li(id=val.class_id)= val.name
+                    button(type='submit' onClick='selectCourse('+val.class_id+')') Request
+    button(name = "button_id" value = "display", type = "submit" onClick="displayCourses()") Display Courses
+    button(name = "button_id" value = "logout" type = "submit" onClick="logout()") Logout
