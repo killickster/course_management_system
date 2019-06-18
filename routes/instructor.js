@@ -36,6 +36,7 @@ router.get('/home', sessionChecker, (req, res) => {
 
 	//Initalize session variable which holds classes this instructor is teaching
 	req.session.user.classesTeaching = [];
+	req.session.save();
 
 	var userId = req.session.user.user_id;
 
@@ -43,6 +44,7 @@ router.get('/home', sessionChecker, (req, res) => {
 	//Get all the classes the instructor is teaching
 	connection.query('SELECT * FROM has_teaching WHERE instructor_id=?;', [userId], (error, results, fields) => {
 
+		if(results.length != 0){
 		for(i = 0; i < results.length; i++){
 			const class_id = results[i].class_id;
 
@@ -66,7 +68,9 @@ router.get('/home', sessionChecker, (req, res) => {
 
 
 
+
 		}
+	}
 	})
 
 })
@@ -91,6 +95,7 @@ router.post('/displayClasses', (req,res) => {
 router.post('/searchClasses', (req,res) => {
 
 	req.session.user.allAvailableClasses = []
+	req.session.save();
 
 	//Initalize an array to hold the class ids the instructor cannot request
 	var notAvailble = []
