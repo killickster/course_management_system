@@ -344,7 +344,29 @@ router.route('/newProgram')
 			res.redirect('/');
 		}
 	});
-	
+
+router.route('/approveRequests')
+	.get(sessionChecker, (req, res) => {
+		connection.query('SELECT users.user_id, users.first_name, users.last_name, departments.dept_abbv, courses.course_num, classes.class_id FROM users, departments, courses, teach_request, classes WHERE teach_request.instructor_id = users.user_id AND teach_request.class_id = classes.class_id AND classes.course_id = courses.course_id AND courses.dept_id = departments.dept_id', function(error, results, fields){
+			res.render('approveRequests', { requests : results });
+		});
+	})
+	.post((req, res) => {
+		var buttonPressed = JSON.parse(req.body.button_id);
+		console.log(buttonPressed.class_id);
+		var class_id = buttonPressed.class_id;
+		var instructor_id = buttonPressed.instructor_id;
+		if (buttonPressed.action == 'approve'){
+			connection.query('INSERT INTO has_teaching (class_id, instructor_id) VALUES (?, ?)', [class_id, instructor_id]);
+			connection.query('DELETE FROM teach_request WHERE class_id = ? AND instructor_id = ?', [class_id, instructor_id]);
+		} else if (buttonPressed.action == 'deny'){
+			connection.query('DELETE FROM teach_request WHERE class_id = ? AND instructor_id = ?', [class_id, instructor_id]);
+		} else res.redirect('/');
+		connection.query('SELECT users.user_id, users.first_name, users.last_name, departments.dept_abbv, courses.course_num, classes.class_id FROM users, departments, courses, teach_request, classes WHERE teach_request.instructor_id = users.user_id AND teach_request.class_id = classes.class_id AND classes.course_id = courses.course_id AND courses.dept_id = departments.dept_id', function(error, results, fields){
+			res.render('approveRequests', { requests : results });
+		});
+	})
+
 router.route('/editStudent').get(sessionChecker, (req,res) => {
 	connection.query('SELECT user_id, first_name, last_name FROM users WHERE role = \'student\'', (error, results, fields) => {
 		req.session.studentSelected = 0;
@@ -403,7 +425,7 @@ router.route('/editStudent').get(sessionChecker, (req,res) => {
 			res.redirect('/');
 	}
 })
-	
+
 router.route('/changePass')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.passMessage;
