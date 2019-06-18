@@ -366,7 +366,66 @@ router.route('/approveRequests')
 			res.render('approveRequests', { requests : results });
 		});
 	})
-	
+
+router.route('/editStudent').get(sessionChecker, (req,res) => {
+	connection.query('SELECT user_id, first_name, last_name FROM users WHERE role = \'student\'', (error, results, fields) => {
+		req.session.studentSelected = 0;
+		req.session.students = JSON.parse(JSON.stringify(results));
+		res.render('editStudent', { students:req.session.students, studentSelected:req.session.studentSelected});
+	})
+}).post((req, res) => {
+	if (req.session.studentSelected == 0) {
+		console.log(req.body.student_selected);
+		req.session.selected_student = JSON.parse(req.body.student_selected);
+		req.session.studentSelected = req.session.selected_student.user_id;
+	}
+	var studentSelected = req.session.selected_student.user_id;
+	var buttonPressed = req.body.button_id;
+	if(buttonPressed == 'select' && studentSelected != 0){
+		connection.query('SELECT courses_taken.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses_taken, courses, departments WHERE courses_taken.student_id = ? AND courses_taken.course_id = courses.course_id AND departments.dept_id = courses.dept_id', req.session.studentSelected, (error, coursesTaken, fields) => {
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE departments.dept_id = courses.dept_id';
+			if (coursesTaken.length > 0) {
+				var course_ids = coursesTaken.map(a => a.course_id);
+				q = q + ' AND courses.course_id NOT IN (' + course_ids.join(',') + ')';
+			}
+			connection.query(q, (error, notTaken, fields) => {
+				res.render('editStudent',{ studentSelected : studentSelected, selected_student : req.session.selected_student, coursesTaken : coursesTaken, notTaken : notTaken} );
+			})
+		})
+	} else if(buttonPressed == 'add'){
+		var courseToAdd = JSON.parse(req.body.course_to_add);
+		var courseToAddId = courseToAdd.course_id;
+		connection.query('INSERT INTO courses_taken (student_id, course_id) VALUES (?, ?)', [studentSelected, courseToAddId]);
+		connection.query('SELECT courses_taken.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses_taken, courses, departments WHERE courses_taken.student_id = ? AND courses_taken.course_id = courses.course_id AND departments.dept_id = courses.dept_id', req.session.studentSelected, (error, coursesTaken, fields) => {
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE departments.dept_id = courses.dept_id';
+			if (coursesTaken.length > 0) {
+				var course_ids = coursesTaken.map(a => a.course_id);
+				q = q + ' AND courses.course_id NOT IN (' + course_ids.join(',') + ')';
+			}
+			connection.query(q, (error, notTaken, fields) => {
+				res.render('editStudent',{ studentSelected : studentSelected, selected_student : req.session.selected_student, coursesTaken : coursesTaken, notTaken : notTaken} );
+			})
+		})
+	} else if(buttonPressed.startsWith('remove')){
+		var courseIdToRemove = parseInt(buttonPressed.replace('remove',''));
+		connection.query('DELETE FROM courses_taken WHERE student_id = ? AND course_id = ?', [studentSelected, courseIdToRemove]);
+		connection.query('SELECT courses_taken.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses_taken, courses, departments WHERE courses_taken.student_id = ? AND courses_taken.course_id = courses.course_id AND departments.dept_id = courses.dept_id', req.session.studentSelected, (error, coursesTaken, fields) => {
+			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE departments.dept_id = courses.dept_id';
+			if (coursesTaken.length > 0) {
+				var course_ids = coursesTaken.map(a => a.course_id);
+				q = q + ' AND courses.course_id NOT IN (' + course_ids.join(',') + ')';
+			}
+			connection.query(q, (error, notTaken, fields) => {
+				res.render('editStudent',{ studentSelected : studentSelected, selected_student : req.session.selected_student, coursesTaken : coursesTaken, notTaken : notTaken} );
+			})
+		})
+	} else {
+			req.session.students = undefined;
+			delete(req.session.students);
+			res.redirect('/');
+	}
+})
+
 router.route('/changePass')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.passMessage;

@@ -29,3 +29,35 @@ var selectCourse = function(class_id){
         }
     )
 }
+
+
+var viewClasses = function(){
+    $.ajax({
+        type: 'POST',
+        url: 'viewClasses/',
+        success(path){
+            window.location = path
+        }
+    })
+}
+
+var returnHome = function(){
+    $.ajax({
+        type:'POST',
+        url:'returnHome/',
+        success(path){
+            window.location = path
+        }
+    })
+}
+
+
+var logout = function(){
+    $.ajax({
+        type: 'POST',
+        url: 'logout/',
+        success: function(path){
+            window.location = path
+        }
+    })
+}

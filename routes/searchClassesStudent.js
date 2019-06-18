@@ -65,8 +65,6 @@ router.post('/requestClass', (req,res) => {
                         return !(val.class_id == class_id)
                     })
                     res.json(class_id)
-                    return;
-                    console.log(req.session.user.availibleClasses)
                 }
     })
     }else{
@@ -76,6 +74,12 @@ router.post('/requestClass', (req,res) => {
 
 
 })
+
+router.post('/returnHome', (req,res) => {
+    console.log('returning home')
+    res.json('/student/home')
+})
+
 
 
 module.exports = router;
