@@ -353,7 +353,6 @@ router.route('/approveRequests')
 	})
 	.post((req, res) => {
 		var buttonPressed = JSON.parse(req.body.button_id);
-		console.log(buttonPressed.class_id);
 		var class_id = buttonPressed.class_id;
 		var instructor_id = buttonPressed.instructor_id;
 		if (buttonPressed.action == 'approve'){
@@ -366,6 +365,31 @@ router.route('/approveRequests')
 			res.render('approveRequests', { requests : results });
 		});
 	})
+	
+router.route('/viewInstructor')
+	.get(sessionChecker, (req, res) => {
+		req.session.instructorSelected = 0;
+		connection.query('SELECT user_id, first_name, last_name FROM users WHERE role = "instructor"', (error, results, fields) => {
+			req.session.instructors = results;
+			res.render('viewInstructor', { instructorSelected : req.session.instructorSelected, instructors : results});
+		});
+	})
+	.post((req, res) => {
+		var buttonPressed = req.body.button_id;
+		if (buttonPressed == 'select') {
+			if (req.body.instructor_selected != 'void') {
+				var selectedInstructor = JSON.parse(req.body.instructor_selected);
+				req.session.instructorSelected = selectedInstructor.user_id;
+				connection.query('SELECT departments.dept_abbv, courses.course_num, classes.class_id FROM departments, courses, classes, has_teaching WHERE has_teaching.instructor_id = ? AND has_teaching.class_id = classes.class_id AND classes.course_id = courses.course_id AND courses.dept_id = departments.dept_id', [req.session.instructorSelected], (error, results, fields) => {
+					res.render('viewInstructor', { instructorSelected : req.session.instructorSelected, instructors : req.session.instructors, selectedInstructor : selectedInstructor , classes : results});
+				});
+			} else { 
+				res.render('viewInstructor', { instructorSelected : req.session.instructorSelected, instructors : results});
+			}
+		} else {
+			res.redirect('/');
+		}
+	})
 
 router.route('/editStudent').get(sessionChecker, (req,res) => {
 	connection.query('SELECT user_id, first_name, last_name FROM users WHERE role = \'student\'', (error, results, fields) => {
@@ -375,11 +399,12 @@ router.route('/editStudent').get(sessionChecker, (req,res) => {
 	})
 }).post((req, res) => {
 	if (req.session.studentSelected == 0) {
-		console.log(req.body.student_selected);
-		req.session.selected_student = JSON.parse(req.body.student_selected);
-		req.session.studentSelected = req.session.selected_student.user_id;
+		if (req.body.student_selected != 'void') {
+			req.session.selected_student = JSON.parse(req.body.student_selected);
+			req.session.studentSelected = req.session.selected_student.user_id;
+			var studentSelected = req.session.selected_student.user_id;
+		}
 	}
-	var studentSelected = req.session.selected_student.user_id;
 	var buttonPressed = req.body.button_id;
 	if(buttonPressed == 'select' && studentSelected != 0){
 		connection.query('SELECT courses_taken.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses_taken, courses, departments WHERE courses_taken.student_id = ? AND courses_taken.course_id = courses.course_id AND departments.dept_id = courses.dept_id', req.session.studentSelected, (error, coursesTaken, fields) => {
@@ -431,7 +456,7 @@ router.route('/changePass')
 		message = req.session.passMessage;
 		req.session.passMessage = undefined;
 		delete(req.session.passMessage);
-		res.render('changePass', {message : message});
+		res.render('changePass', {message : message, role: req.session.user.role });
 	})
 	.post((req, res) => {
 		var buttonPressed = req.body.button_id;
