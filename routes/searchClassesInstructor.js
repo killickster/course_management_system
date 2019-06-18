@@ -15,6 +15,8 @@ router.use(bodyParser.json())
 
 router.get('/classes', (req,res) => {
 
+    console.log('hello')
+
     res.render('requestClasses.pug',{classes:req.session.user.allAvailableClasses})
     
 })

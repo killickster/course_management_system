@@ -29,9 +29,10 @@ var sessionChecker = (req, res, next) => {
 
 router.get('/home', sessionChecker, (req, res) => {
 	res.render('instructorHome', { searchClasses: false, name: req.session.user.first_name});
-	
+
 	connection.query('SELECT * FROM teach_request WHERE instructor_id=?', [req.session.user.user_id], (error, results, fields) => {
 		req.session.user.requestedClasses = results;
+		req.session.save();
 	})
 
 	//Initalize session variable which holds classes this instructor is teaching
