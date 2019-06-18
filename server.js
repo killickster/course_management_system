@@ -32,20 +32,20 @@ app.use('/admin', adminRouter);
 app.use('/instructor', instructorRouter);
 app.use('/student', studentRouter);
 
+//check if user is logged in
 var sessionChecker = (req, res, next) => {
 	if (req.session.user) {
 		res.redirect('/roles');
 	} else {
 		next();
 	}
-
-
 };
 
 app.get('/', sessionChecker, (req, res) => {
 	res.redirect('/login');
 });
 
+//allow user to log in
 app.route('/login')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.loginMessage;
@@ -76,6 +76,7 @@ app.route('/login')
 			}
 	});
 	
+//redirect user based on role after login
 app.get('/roles', (req, res) => {
 		if(req.session.user.role == 'student'){
 			req.session.user.courses = [];

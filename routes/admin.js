@@ -10,7 +10,7 @@ var fs = require('fs');
 
 var connection = mysql.createConnection(JSON.parse(fs.readFileSync('db/db.json')));
 
-
+//check if user is logged in and has admin role
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'admin') {
 		req.session.loginMessage = 'noAccess';
@@ -21,9 +21,7 @@ var sessionChecker = (req, res, next) => {
 	}
 };
 
-var updatePrereqs = (req, res) => {
-	};
-
+//display admin homepage
 router.route('/')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.loginMessage;
@@ -34,7 +32,8 @@ router.route('/')
 	.post((req, res) => {
 		res.redirect('/admin/'+req.body.button_id);
 	})
-	
+
+//create new user
 router.route('/newUser')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.newUserMessage;
@@ -56,7 +55,7 @@ router.route('/newUser')
 			if(username && firstname && lastname) {
 				connection.query('SELECT * FROM users WHERE username = ?', [username], function(error, results, fields){
 					if(results.length == 0) {
-						var password = '000000';
+						var password = Math.random().toString(36).slice(2);  //generate random password as alphanumeric string
 						connection.query('INSERT INTO `users` (`username`, `password`, `first_name`, `last_name`, `role`) VALUES ( \''+username+'\',\''+password+'\',\''+firstname+'\',\''+lastname+'\',\''+role+'\')');
 						req.session.newUserMessage = 'success';
 						req.session.newUser = {
@@ -79,6 +78,7 @@ router.route('/newUser')
 		}
 	});
 
+//add or remove prerequisites for existing course
 router.route('/editPrereq').get(sessionChecker, (req,res) => {
 	connection.query('SELECT courses.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses, departments WHERE courses.dept_id = departments.dept_id', (error, results, fields) => {
 		req.session.courseSelected = 0;
@@ -92,7 +92,7 @@ router.route('/editPrereq').get(sessionChecker, (req,res) => {
 	}
 	var courseSelected = req.session.selected_course.course_id;
 	var buttonPressed = req.body.button_id;
-	if(buttonPressed == 'select' && courseSelected != 0){
+	if(buttonPressed == 'select' && courseSelected != 0){				//display prerequisites for selected course and courses to add as prerequisites
 		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
 			var q = 'SELECT course_id, dept_abbv, course_num, course_name FROM courses, departments WHERE courses.course_id != ? AND departments.dept_id = courses.dept_id';
 			if (prereqs.length > 0) {
@@ -103,7 +103,7 @@ router.route('/editPrereq').get(sessionChecker, (req,res) => {
 				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
 			})
 		})
-	} else if(buttonPressed == 'add'){
+	} else if(buttonPressed == 'add'){									//add selected prerequisite; update and reload page
 		var prereqToAdd = JSON.parse(req.body.course_to_add);
 		var prereqToAddId = prereqToAdd.course_id;
 		connection.query('INSERT INTO prereqs (course_id, prereq_id) VALUES (?, ?)', [courseSelected, prereqToAddId]);
@@ -117,7 +117,7 @@ router.route('/editPrereq').get(sessionChecker, (req,res) => {
 				res.render('editPrereq',{ courseSelected : courseSelected, selected_course : req.session.selected_course, prereqs : prereqs, notPrereqs : notPrereqs} );
 			})
 		})
-	} else if(buttonPressed.startsWith('remove')){
+	} else if(buttonPressed.startsWith('remove')){						//remove selected prerequisite; update and reload page
 		var prereqIdToRemove = parseInt(buttonPressed.replace('remove',''));
 		connection.query('DELETE FROM prereqs WHERE course_id = ? AND prereq_id = ?', [courseSelected, prereqIdToRemove]);
 		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
@@ -137,6 +137,7 @@ router.route('/editPrereq').get(sessionChecker, (req,res) => {
 	}
 })
 
+//add or remove required courses from program
 router.route('/editProgram').get(sessionChecker, (req,res) => {
 	connection.query('SELECT program_id, program_name, program_abbv FROM programs', (error, results, fields) => {
 		req.session.programSelected = 0;
@@ -194,7 +195,8 @@ router.route('/editProgram').get(sessionChecker, (req,res) => {
 			res.redirect('/');
 	}
 })
-	
+
+//create new class section for existing course
 router.route('/newClass').get(sessionChecker, (req,res) => {
 	connection.query('SELECT courses.course_id, departments.dept_abbv, courses.course_num, courses.course_name FROM courses, departments WHERE courses.dept_id = departments.dept_id', (error, results, fields) => {
 		var courseSelected = 0;
@@ -225,6 +227,7 @@ router.route('/newClass').get(sessionChecker, (req,res) => {
 	}
 })
 
+//create new department
 router.route('/newDept')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.deptMessage;
@@ -261,6 +264,7 @@ router.route('/newDept')
 		}
 	});
 	
+//create new course
 router.route('/newCourse')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.courseMessage;
@@ -306,7 +310,8 @@ router.route('/newCourse')
 			res.redirect('/');
 		}
 	});
-	
+
+//create new program
 router.route('/newProgram')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.progMessage;
@@ -345,6 +350,7 @@ router.route('/newProgram')
 		}
 	});
 
+//approve or deny requests by instructors to teach courses
 router.route('/approveRequests')
 	.get(sessionChecker, (req, res) => {
 		connection.query('SELECT users.user_id, users.first_name, users.last_name, departments.dept_abbv, courses.course_num, classes.class_id FROM users, departments, courses, teach_request, classes WHERE teach_request.instructor_id = users.user_id AND teach_request.class_id = classes.class_id AND classes.course_id = courses.course_id AND courses.dept_id = departments.dept_id', function(error, results, fields){
@@ -365,7 +371,8 @@ router.route('/approveRequests')
 			res.render('approveRequests', { requests : results });
 		});
 	})
-	
+
+//view an instructor's course load
 router.route('/viewInstructor')
 	.get(sessionChecker, (req, res) => {
 		req.session.instructorSelected = 0;
@@ -391,6 +398,7 @@ router.route('/viewInstructor')
 		}
 	})
 
+//edit a student's course records to confirm prerequisites
 router.route('/editStudent').get(sessionChecker, (req,res) => {
 	connection.query('SELECT user_id, first_name, last_name FROM users WHERE role = \'student\'', (error, results, fields) => {
 		req.session.studentSelected = 0;
@@ -451,6 +459,8 @@ router.route('/editStudent').get(sessionChecker, (req,res) => {
 	}
 })
 
+
+//change user password
 router.route('/changePass')
 	.get(sessionChecker, (req, res) => {
 		message = req.session.passMessage;
@@ -490,7 +500,8 @@ router.route('/changePass')
 			res.redirect('/');
 		}
 	});
-	
+
+//logout and remove user session data
 router.route('/logout')
 	.get((req, res) => {
 		req.session.user = undefined;
