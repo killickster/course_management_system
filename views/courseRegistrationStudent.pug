@@ -6,6 +6,6 @@ block content
     p(id='message')
     ul#todo
         each val in classes
-            li(id=val.class_id)= val.name
+            li(id=val.class_id)= val.name + ", section: " + val.section
                 button(type='submit' onClick='selectCourse('+val.class_id+')') Request
     button(type='submit' onClick='returnHome()') Return to Homepage
