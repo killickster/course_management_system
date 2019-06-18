@@ -353,7 +353,6 @@ router.route('/approveRequests')
 	})
 	.post((req, res) => {
 		var buttonPressed = JSON.parse(req.body.button_id);
-		console.log(buttonPressed.class_id);
 		var class_id = buttonPressed.class_id;
 		var instructor_id = buttonPressed.instructor_id;
 		if (buttonPressed.action == 'approve'){
@@ -365,6 +364,31 @@ router.route('/approveRequests')
 		connection.query('SELECT users.user_id, users.first_name, users.last_name, departments.dept_abbv, courses.course_num, classes.class_id FROM users, departments, courses, teach_request, classes WHERE teach_request.instructor_id = users.user_id AND teach_request.class_id = classes.class_id AND classes.course_id = courses.course_id AND courses.dept_id = departments.dept_id', function(error, results, fields){
 			res.render('approveRequests', { requests : results });
 		});
+	})
+	
+router.route('/viewInstructor')
+	.get(sessionChecker, (req, res) => {
+		req.session.instructorSelected = 0;
+		connection.query('SELECT user_id, first_name, last_name FROM users WHERE role = "instructor"', (error, results, fields) => {
+			req.session.instructors = results;
+			res.render('viewInstructor', { instructorSelected : req.session.instructorSelected, instructors : results});
+		});
+	})
+	.post((req, res) => {
+		var buttonPressed = req.body.button_id;
+		if (buttonPressed == 'select') {
+			if (req.body.instructor_selected != 'void') {
+				var selectedInstructor = JSON.parse(req.body.instructor_selected);
+				req.session.instructorSelected = selectedInstructor.user_id;
+				connection.query('SELECT departments.dept_abbv, courses.course_num, classes.class_id FROM departments, courses, classes, has_teaching WHERE has_teaching.instructor_id = ? AND has_teaching.class_id = classes.class_id AND classes.course_id = courses.course_id AND courses.dept_id = departments.dept_id', [req.session.instructorSelected], (error, results, fields) => {
+					res.render('viewInstructor', { instructorSelected : req.session.instructorSelected, instructors : req.session.instructors, selectedInstructor : selectedInstructor , classes : results});
+				});
+			} else { 
+				res.render('viewInstructor', { instructorSelected : req.session.instructorSelected, instructors : results});
+			}
+		} else {
+			res.redirect('/');
+		}
 	})
 
 router.route('/editStudent').get(sessionChecker, (req,res) => {
