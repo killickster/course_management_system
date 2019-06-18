@@ -86,11 +86,11 @@ router.route('/editPrereq').get(sessionChecker, (req,res) => {
 		res.render('editPrereq', { courses:req.session.courses, courseSelected:req.session.courseSelected});
 	})
 }).post((req, res) => {
-	if (req.session.courseSelected == 0) {
+	if (req.session.courseSelected == 0 && req.body.course_selected != 'void') {
 		req.session.selected_course = JSON.parse(req.body.course_selected);
 		req.session.courseSelected = req.session.selected_course.course_id;
+		var courseSelected = req.session.selected_course.course_id;
 	}
-	var courseSelected = req.session.selected_course.course_id;
 	var buttonPressed = req.body.button_id;
 	if(buttonPressed == 'select' && courseSelected != 0){				//display prerequisites for selected course and courses to add as prerequisites
 		connection.query('SELECT prereq_id, dept_abbv, course_num, course_name FROM prereqs, courses, departments WHERE prereqs.course_id = ? and prereqs.prereq_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.courseSelected, (error, prereqs, fields) => {
@@ -145,11 +145,11 @@ router.route('/editProgram').get(sessionChecker, (req,res) => {
 		res.render('editProgram', { programs:req.session.programs, programSelected:req.session.programSelected});
 	})
 }).post((req, res) => {
-	if (req.session.programSelected == 0) {
+	if (req.session.programSelected == 0 && req.body.program_selected != 'void') {
 		req.session.selected_program = JSON.parse(req.body.program_selected);
 		req.session.programSelected = req.session.selected_program.program_id;
+		var programSelected = req.session.selected_program.program_id;
 	}
-	var programSelected = req.session.selected_program.program_id;
 	var buttonPressed = req.body.button_id;
 	if(buttonPressed == 'select' && programSelected != 0){
 		connection.query('SELECT courses.course_id, dept_abbv, course_num, course_name FROM program_has, courses, departments WHERE program_has.program_id = ? and program_has.course_id = courses.course_id and departments.dept_id = courses.dept_id', req.session.programSelected, (error, requirements, fields) => {
