@@ -1,0 +1,34 @@
+extends layout.pug
+
+block content
+	form(method = "post" action = "/admin/editStudent")
+		if studentSelected == 0
+			p Select a student from the following list.
+	
+			div.form-group
+				select(name="student_selected")
+					option(value="void") #{"Select a student"}
+						each student in students
+							option(value=student, selected = studentSelected == student.student_id) #{student.first_name} #{student.last_name}
+			div.form-group
+				button(name = "button_id" value = "select" type = "submit") Select
+		else
+			p Modifying records for #{selected_student.first_name} #{selected_student.last_name}
+			p Courses taken:
+			for course in coursesTaken
+				div.form-group
+					button(name = "button_id" value = "remove" + course.course_id type = "submit") Remove this course
+					#{course.course_abbv} #{course.course_num} - #{course.course_name}
+			p Add a course taken:
+			div.form-group
+				select(name="course_to_add")
+					option(value="void") #{"Select a course"}
+						each course in notTaken
+							option(value = course, selected = courseSelected == course.course_id) #{course.dept_abbv} #{course.course_num} - #{course.course_name}
+			div.form-group
+				button(name = "button_id" value = "add" type = "submit") Add course to record
+			
+		div.form-group
+			button(name="button_id" value="cancel" type="submit") Return to Homepage
+
+					

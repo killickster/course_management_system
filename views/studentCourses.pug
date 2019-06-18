@@ -1,10 +1,8 @@
 extends layout.pug
 
 block content
-	p Welcome #{name}!
-	p Your courses are shown below:
-	ul
-		each c in class
-			li=course.course_name
-		div.form-group
-			button(name = "button_id" value = "return" type = "submit") Return to Homepage
+    script(src='/studentAjax.js')
+    ul#todo
+        each val in classes
+            li(id=val.class_id)= val.name
+    button(type='submit' onClick='returnHome()') Return to Homepage

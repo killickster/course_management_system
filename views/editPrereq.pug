@@ -10,8 +10,8 @@ block content
 					option(value="void") #{"Select a course"}
 						each course in courses
 							option(value=course, selected = courseSelected == course.course_id) #{course.dept_abbv} #{course.course_num} - #{course.course_name}
-			div.for-group
-			button(name = "button_id" value = "select" type = "submit") Select
+			div.form-group
+				button(name = "button_id" value = "select" type = "submit") Select
 		else
 			p Modifying prerequisites for #{selected_course.dept_abbv} #{selected_course.course_num} - #{selected_course.course_name}
 			p Current prerequisites:
