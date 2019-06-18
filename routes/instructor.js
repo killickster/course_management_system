@@ -44,18 +44,22 @@ router.get('/home', sessionChecker, (req, res) => {
 	connection.query('SELECT * FROM has_teaching WHERE instructor_id=?;', [userId], (error, results, fields) => {
 
 		for(i = 0; i < results.length; i++){
+			const class_id = results[i].class_id;
 
-			connection.query('SELECT * FROM classes WHERE class_id=?', [results[i].class_id], (error,results,fields)=> {
+			connection.query('SELECT * FROM has_enrolled WHERE class_id=?',[class_id], (error,results,fields) => {
+				const numberOfStudents = results.length
 
-			var course_id = results[0].course_id;
-			const section = results[0].sect;
-			const class_id = results[0].class_id;
+				connection.query('SELECT * FROM classes WHERE class_id=?', [class_id], (error,results,fields)=> {
+
+					var course_id = results[0].course_id;
+					const section = results[0].sect;
+					const class_id = results[0].class_id;
 
 			connection.query('SELECT * FROM courses WHERE course_id=?', [course_id], (error,results,fields) => {
-				req.session.user.classesTeaching.push({class_id:class_id, name:results[0].course_name, section:section, number:results[0].course_num})
+				req.session.user.classesTeaching.push({class_id:class_id, name:results[0].course_name, section:section, number:results[0].course_num, numberOfStudents:numberOfStudents})
 				req.session.save();
 			})
-
+		})
 
 
 		} )
@@ -108,19 +112,21 @@ router.post('/searchClasses', (req,res) => {
 
 	//Get all the classes the instructor could request to teach
 	connection.query('SELECT * FROM classes;', (error, results, fields) => {
-		console.log(notAvailble)
-        for(i = 0; i < results.length; i++){
-
+       for(i = 0; i < results.length; i++){
+		   
 			if(!notAvailble.includes(results[i].class_id)){
 
-			var course_id = results[i].course_id;
-			const section = results[i].sect;
-			const class_id = results[i].class_id;
+				const course_id = results[i].course_id;
+				const section = results[i].sect;
+				const class_id = results[i].class_id; 
+			connection.query('SELECT * FROM has_enrolled WHERE class_id=?',[results[i].class_id], (error,results,fields) => {
+				const numberOfStudents = results.length
 			
             connection.query('SELECT * FROM courses WHERE course_id=?;',[course_id], (error, results, fields)=> {
-				req.session.user.allAvailableClasses.push({class_id:class_id, name:results[0].course_name, section:section, number:results[0].course_num})
+				req.session.user.allAvailableClasses.push({class_id:class_id, name:results[0].course_name, section:section, number:results[0].course_num, numberOfStudents:numberOfStudents})
 				req.session.save();
 		})
+	})
 	}
 	}
 
