@@ -289,6 +289,7 @@ router.route('/newCourse')
 		if (course_desc == undefined) course_desc = "";
 		var course_len = req.body.len;
 		if(buttonPressed == "submit") {
+			console.log(req.body.len);
 			if (course_name && course_num) {
 				connection.query('SELECT * FROM courses WHERE dept_id = ? AND course_num = ?', [dept_id, course_num] , function (error, results, fields) {
 					if(results.length == 0) {

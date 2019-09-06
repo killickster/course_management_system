@@ -16,7 +16,6 @@ router.use(bodyParser.json())
 
 router.use('/searchClasses', searchClasses)
 router.use('/studentClasses', studentClasses)
-
 var sessionChecker = (req, res, next) => {
 	if (!req.session.user || req.session.user.role != 'student') {
 		req.session.loginMessage = 'noAccess';
@@ -26,8 +25,6 @@ var sessionChecker = (req, res, next) => {
 		next();
 	}
 };
-
-
 
 router.get('/home', sessionChecker, (req,res) => {
     req.session.user.classes = [];
